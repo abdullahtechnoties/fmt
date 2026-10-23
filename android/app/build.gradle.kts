@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.fmt.fmt"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -35,10 +35,15 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true        
         }
     }
 }
-
+dependencies {
+    implementation("com.google.android.material:material:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("org.slf4j:slf4j-simple:2.0.13")
+}
 flutter {
     source = "../.."
 }

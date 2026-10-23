@@ -1,0 +1,722 @@
+{
+  "app.name": "FMT",
+
+  "categories":{
+    "title": "Categories",
+    "search_hint": "Search"
+  },
+  "profile":{
+    "title": "My Profile",
+    "personal_info": "Personal Information",
+    "my_profile": "My Profile",
+    "shipping_address": "Shipping Address",
+    "payment_method": "Payment Method",
+    "order_history": "Order History",
+    "support_info": "Support & Information",
+    "privacy_policy": "Privacy Policy",
+    "terms_conditions": "Terms & Conditions",
+    "faqs": "FAQs",
+    "account_management": "Account Management",
+    "change_password": "Change Password"
+  },
+  "order_history": {
+    "title": "Order History",
+    "buy_bulk": "Buy :qty+ for Rs :price each"
+  },
+  "support":{
+    "title": "Support",
+    "full_name": "Full Name",
+    "full_name_hint": "Enter Full Name",
+    "email": "Email Address",
+    "email_hint": "Enter Email Address",
+    "ticket_category": "Ticket Category",
+    "ticket_category_hint": "Select",
+    "subject": "Subject",
+    "subject_hint": "Write Subject...",
+    "describe_issue": "Describe Your Issue",
+    "describe_issue_hint": "Write Your Issue...",
+    "submit": "Submit Ticket"
+
+  },
+  "profile_edit": {
+   "title": "My Profile",
+   "personal_info": "Personal Information",
+   "full_name": "Full Name",
+   "full_name_hint": "Enter Full Name",
+   "email": "Email Address",
+   "email_hint": "Enter Email Address",
+   "phone": "Phone Number",
+   "phone_hint": "+92 000-0000000",
+   "dob": "Date of Birth",
+   "dob_hint": "DD/MM/YYYY",
+   "gender": "Gender",
+   "gender_hint": "Select Gender",
+   "save": "Save"
+  },
+  "password":{
+    "title": "Change Password",
+    "old": "Old Password",
+    "old_hint": "Enter Old Password",
+    "new_pass": "New Password",
+    "new_hint": "Enter New Password",
+    "repeat": "Repeat New Password",
+    "repeat_hint": "Repeat New Password",
+    "save": "Save Password"
+  },
+  "chat":{
+    "active_now": "Active Now",
+    "type_message": "Type a Message",
+    "just_now": "Just Now"
+  },
+  "drawer":{
+    "home": "Home",
+    "shop": "Shop",
+    "categories": "Categories",
+    "cart": "Cart",
+    "profile": "Profile"
+  },
+  "welcome": {
+    "title": "Welcome to",
+    "appName": "va_bookats",
+    "tagline": "The best way to manage your money",
+    "buttonText": "Get Start",
+    "exitDialog": {
+      "title": "Exit Application",
+      "message": "Are you sure you want to exit the application?"
+    }
+  },
+  "forgotPassword": {
+    "title": "Password Reset",
+    "emailOrUsernameLabel": "Email Or Username",
+    "emailOrUsernameValidation": "Please fill out this field",
+    "resetPasswordButton": "Reset Password",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "reset_password": {
+      "already_have_account": "Already have an account?",
+      "login_button": "Login",
+      "screen_title": "Reset Password",
+      "password": "Password",
+      "confirm_password": "Confirm Password",
+      "reset_button": "Reset",
+      "password_required": "Please fill in this field",
+      "confirm_password_required": "Please fill in this field"
+    }
+  },
+  "pinCodeVerification": {
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login",
+    "verifyOtp": "Verify OTP",
+    "codeSent": "Your code was sent to you via :email",
+    "enter6DigitsError": "Enter 6 digits",
+    "verifyButton": "Verify"
+  },
+  "signUp": {
+    "haveAccountText": "Already have an account?",
+    "loginButton": "Login",
+    "title": "Create an account",
+    "fields": {
+      "email": "Email",
+      "country": "Country",
+      "phone": "Phone",
+      "referralCode": "Referral Code",
+      "password": "Password"
+    },
+    "validation": {
+      "required": "Please fill out this field",
+      "phoneRequired": "The phone field is required"
+    },
+    "countrySheet": {
+      "title": "Select Country"
+    },
+    "nextButton": "Next Step",
+    "toast": {
+      "phoneRequired": "The phone field is required"
+    }
+  },
+  "privacy_policy": {
+    "title": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "acceptable_use": "Acceptable Use",
+    "advertising_rules": "Advertising Rules",
+    "responsible_disclosure": "Responsible Disclosure"
+  },
+   "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "prev": "Prev",
+    "get_started": "Get Started",
+    "page_indicator": "/",
+    "slide_1_title": "Choose Products",
+    "slide_1_desc": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit.",
+    "slide_2_title": "Make Payment",
+    "slide_2_desc": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit.",
+    "slide_3_title": "Get Your Order",
+    "slide_3_desc": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit."
+  },
+  "auth": {
+    "welcome_back": "Welcome Back!",
+    "username_email_hint": "Username or Email",
+    "password_hint": "Password",
+    "confirm_password_hint": "ConfirmPassword",
+    "forgot_password_link": "Forgot Password?",
+    "login_btn": "Login",
+    "or_continue_with": "- OR Continue with -",
+    "no_account": "Create An Account ",
+    "sign_up_link": "Sign Up",
+    "create_account_title": "Create An Account",
+    "tos_prefix": "By clicking the ",
+    "tos_link": "Register button",
+    "tos_suffix": ", you agree to the public offer",
+    "create_account_btn": "Create Account",
+    "have_account": "I Already Have an Account ",
+    "login_link": "Login",
+    "forgot_password_title": "Forgot Password?",
+    "email_hint": "Enter your email address",
+    "reset_password_desc": "* We will send you a message to set or reset your new password",
+    "submit_btn": "Submit",
+    "login": {
+      "title": "Let's Sign You In",
+      "subtitle": "Welcome back, you've\nbeen missed!",
+      "loginLabel": "Email or Phone",
+      "loginHint": "Enter your email or phone",
+      "companyIdLabel": "Company Id",
+      "companyIdHint": "Enter your company id",
+      "emailLabel": "Email Address",
+      "emailHint": "hannah.turin@email.com",
+      "passwordLabel": "Password",
+      "passwordHint": "••••••",
+      "rememberMe": "Remember Me",
+      "forgotPassword": "Forgot Password ?",
+      "loginBtn": "Login",
+      "or": "OR",
+      "continueWithGoogle": "Continue with Google",
+      "noAccount": "Don't have an account ?",
+      "signUp": "Sign Up",
+      "successTitle": "Welcome Back!",
+      "successMessage": "You have successfully logged in.",
+      "errorTitle": "Login Failed",
+      "googleTitle": "Google Sign In",
+      "googleMessage": "Redirecting to Google authentication..."
+    },
+    "signup": {
+      "title": "Getting Started",
+      "subtitle": "Seems you are new here,\nLet's set up your profile.",
+      "fullNameLabel": "Full Name",
+      "emailLabel": "Email Address",
+      "addressLabel": "Current Address",
+      "zipCodeLabel": "Zip Code",
+      "stateLabel": "State",
+      "selectState": "Select State",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "termsPrefix": "By creating an account, you agree to our",
+      "termsLink": "Term and Conditions",
+      "signUpBtn": "Sign Up",
+      "haveAccount": "Already have an account ?",
+      "login": "Login",
+      "successTitle": "Account Created!",
+      "successMessage": "Your account has been successfully created.",
+      "errorTitle": "Error",
+      "termsError": "Please agree to the Terms and Conditions to continue."
+    },
+    "validation": {
+      "loginRequired": "Email or phone number is required",
+      "loginInvalid": "Please enter a valid email or phone number",
+      "companyIdRequired": "Company id is required",
+      "fullNameRequired": "Full name is required",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "addressRequired": "Address is required",
+      "zipRequired": "Zip code is required",
+      "stateRequired": "Please select a state",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "onboard": {
+    "continue": "Continue",
+    "slide1": {
+      "title": "Easy Process",
+      "desc": "Find all your house needs in one place. We provide every service to make your home experience smooth."
+    },
+    "slide2": {
+      "title": "Book Instantly",
+      "desc": "Schedule appointments with top professionals in just a few taps, anytime and anywhere."
+    },
+    "slide3": {
+      "title": "Relax & Enjoy",
+      "desc": "Sit back and let our trusted experts take care of everything you need at your doorstep."
+    }
+  },
+  "home": {
+    "categories": "Categories",
+    "view_all": "View all",
+    "featured_products": "Featured Products",
+    "special_products": "Special Products",
+    "shop_now": "Shop Now",
+    "browse": "Browse",
+    "products_count": ":count Products",
+    "banner_title": "FMT Online Store",
+    "banner_subtitle": "Mobile Spare\nParts at the Best\nPrices",
+    "currency_symbol": "Rs ",
+    "greeting": "Bookats Awaits:",
+    "greetingSubtitle": "Book Your Appointment Today!",
+    "searchHint": "Search Something",
+    "todayBooking": "Today Booking",
+    "viewAll": "View All",
+    "help_and_support": {
+      "title": "My Ticket List",
+      "search_field_hint": "Subject",
+      "filter_icon_alt": "Filter",
+      "no_tickets": "No tickets found",
+      "view_button": "View",
+      "replay_ticket": {
+        "title": "Reply Ticket",
+        "close_ticket": "Close Ticket",
+        "reopen_ticket": "Reopen Ticket",
+        "write_message_placeholder": "Write your reply here.....",
+        "add_attachment": "Add Attachment",
+        "send_button": "Send",
+        "message_required": "Message fields is required",
+        "attachment_preview": "Attachment Preview",
+        "attachments_label": "Attachments",
+        "admin_name": "Super Admin"
+      },
+      "create_ticket_dialog": {
+        "title": "Open a New Ticket",
+        "subject_label": "Subject",
+        "precedence_label": "Precedence",
+        "precedence_placeholder": "Select Precedence",
+        "message_label": "Your Message",
+        "attachments_label": "Attachments",
+        "attach_file": "Attach File",
+        "close_button": "Close",
+        "create_button": "Create Ticket",
+        "toast_required_fields": "Fill up all required fields",
+        "dropdown_title": "Select Precedence",
+        "precedence_options": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
+      },
+      "subject_input_section": {
+        "label": "Subject"
+      },
+      "ticket_history_filter_popup": {
+        "title": "Filters",
+        "date_label": "Date",
+        "dialog_title": "Select Date Range",
+        "cancel_button": "Cancel",
+        "apply_button": "Apply",
+        "reset_button": "Reset",
+        "search_button": "Search"
+      }
+    },
+    "profileSettings": {
+      "title": "Profile Settings",
+      "personalInfo": "Personal Information",
+      "contactDetails": "Contact Details",
+      "buttons": {
+        "saveChanges": "Save Changes"
+      },
+      "formFields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "username": "Username",
+        "gender": "Gender",
+        "selectGender": "Select Gender",
+        "dateOfBirth": "Date of Birth",
+        "selectDate": "Select Date",
+        "email": "Email Address",
+        "phone": "Phone",
+        "country": "Country",
+        "city": "City",
+        "zip": "Zip",
+        "address": "Address",
+        "joiningDate": "Joining Date"
+      },
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other"
+      }
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "buttons": {
+        "changePassword": "Change Password"
+      },
+      "formFields": {
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "validation": {
+        "currentPasswordRequired": "Please enter your current password",
+        "newPasswordRequired": "Please enter a new password",
+        "passwordLength": "Password must be at least 8 characters",
+        "confirmPasswordRequired": "Please confirm your password",
+        "passwordMismatch": "Passwords do not match"
+      }
+    },
+    "securitySettings": {
+      "title": "Security Settings",
+      "2fa": {
+        "title": "2FA Authentication",
+        "description": "Enhance your account security with two-factor authentication",
+        "buttonText": "Generate 2FA"
+      },
+      "passcode": {
+        "title": "Passcode",
+        "description": "Create a secure passcode for quick access to your account",
+        "buttonText": "Generate Passcode"
+      },
+      "changePasscode": {
+        "title": "Change Passcode",
+        "fields": {
+          "old": "Old Passcode",
+          "new": "New Passcode",
+          "confirm": "Confirm Passcode"
+        },
+        "buttons": {
+          "close": "Close",
+          "change": "Change Passcode"
+        },
+        "toast": {
+          "fillAllFields": "Fill up all required fields",
+          "mismatch": "Passcode do not match"
+        }
+      },
+      "securitySettings": {
+        "passcode": {
+          "title": "Passcode",
+          "disable": "Disable Passcode",
+          "change": "Change Passcode"
+        },
+        "disablePopup": {
+          "title": "Confirm Your Password",
+          "passwordLabel": "Password",
+          "close": "Close",
+          "confirm": "Confirm",
+          "passwordRequired": "Password field is required"
+        }
+      }
+    },
+    "notification": {
+      "title": "Notification",
+      "header": "Notification",
+      "mark_all_read": "Mark all read",
+      "no_data": "No notifications found",
+      "sections": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      }
+    },
+    "common": {
+      "noDataFound": {
+        "noDataFound": "No Data Found!",
+        "refreshingText": "Try refreshing or check back later.",
+        "tryAgainButtonText": "Try Again"
+      },
+      "imagePicker": {
+        "selectImageSource": "Select Image Source",
+        "camera": "Camera",
+        "gallery": "Gallery"
+      },
+      "confirm_passcode_popup": {
+        "title": "Confirm Your Passcode",
+        "passcode_label": "Passcode",
+        "close_button": "Close",
+        "confirm_button": "Confirm"
+      },
+      "bottomNavBar": {
+        "home": "Home",
+        "card": "Card",
+        "wallets": "Wallets",
+        "reward": "Reward",
+        "settings": "Settings"
+      },
+      "alertDialog": {
+        "unauthorizedTitle": "Unauthorized",
+        "unauthorizedMessage": "You are not authorized to access this resource. Please log in again!",
+        "cancelButton": "Cancel",
+        "confirmButton": "Confirm"
+      },
+      "search": "Search",
+      "noResultsFound": "No results found",
+      "tryDifferentSearch": "Try a different search term",
+      "noItemAvailable": "No {item} available",
+      "discardTitle": "Discard Changes?",
+      "discardMessage": "Going back will discard all the information you have entered. Are you sure?",
+      "cancel": "Cancel",
+      "discard": "Discard"
+    },
+    "login": {
+      "title": "LoginView",
+      "working": "LoginView is working"
+    }
+  },
+  "errors": {
+    "sessionExpired": {
+      "title": "Session Expired",
+      "message": "Your session has expired. Please login again to continue."
+    },
+    "connectionTimeout": "Connection timed out. Please try again.",
+    "noInternet": "No internet connection. Please check your network.",
+    "badResponse": "Bad response from server.",
+    "requestCancelled": "Request was cancelled.",
+    "unexpected": "An unexpected error occurred. Please try again.",
+    "validationFailed": "Validation failed.",
+    "unauthorized": "Unauthorised. You Don't Have Permissions To Access.",
+    "requestFailed": "Request failed.",
+    "internalServerError": "Internal server error. Please try again later.",
+    "emptyResponse": "Empty response from server.",
+    "imagePickerGallery": "Failed to pick image from gallery",
+    "imagePickerCamera": "Failed to pick image from camera",
+    "errorTitle": "Error",
+    "unexpectedShort": "An unexpected error occurred.",
+    "unexpectedResponse": "Unexpected response from server."
+  },
+  "login": {
+    "title": "Log In",
+    "emailOrPhone": "Email or Phone number",
+    "password": "Password",
+    "forgotPassword": "Forgot password ?",
+    "loginBtn": "Log In",
+    "noAccount": "Don't have account ?",
+    "signUp": "Sign up",
+    "errorTitle": "Error",
+    "emptyFields": "Please fill in all fields",
+    "successTitle": "Success",
+    "successMsg": "Logged in successfully",
+    "invalidEmail": "Please enter a valid email address.",
+    "missingAccessToken": "Missing access token in response.",
+    "loginFailed": "An error occurred during login. Please try again.",
+    "resetCodeSent": "Reset code sent successfully.",
+    "resetCodeFailed": "Failed to send reset code."
+  },
+  "recovery": {
+    "title": "Recover your account",
+    "subtitle": "Enter your existing email or phone number by which you created your account",
+    "emailOrPhone": "email or phone number",
+    "recoverBtn": "Recover",
+    "termsOfUse": "Terms of use",
+    "privacyPolicy": "Privacy Policy",
+    "errorTitle": "Error",
+    "emptyField": "Please enter your email or phone number",
+    "successTitle": "Success",
+    "successMsg": "Recovery link sent successfully"
+  },
+  "signup": {
+    "title": "Sign Up",
+    "username": "User name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "repeatPassword": "Repeat Password",
+    "nextBtn": "Next",
+    "errorTitle": "Error",
+    "emptyFields": "Please fill in all fields",
+    "passwordMismatch": "Passwords do not match",
+    "successTitle": "Success",
+    "successMsg": "Account created successfully"
+  },
+  "location": {
+    "title": "Enable Location",
+    "description": "Your location helps us show you matches near you and provide a better experience. You can enable it in settings.",
+    "openSettings": "Open Settings",
+    "notNow": "Not Now"
+  },
+  "otp": {
+    "timer": "00:23",
+    "subtitle": "Type your verification code here",
+    "sendAgain": "Send again?",
+    "confirm": "Confirm",
+    "errorTitle": "Error",
+    "incompleteCode": "Please enter the complete 6-digit code",
+    "successTitle": "Success",
+    "successMsg": "Code verified successfully",
+    "resendSuccess": "Code resent successfully",
+    "emailRequired": "Email is required to continue.",
+    "verifySuccess": "Email verified successfully.",
+    "resentSuccess": "Code resent successfully"
+  },
+  "app": {
+    "name": "FMT"
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "success": "Success",
+    "error": "Error",
+    "loadingFilters": "Loading filters…"
+  },
+  "permissions": {
+    "noAccess": {
+      "title": "No Access",
+      "message": "You don't have access to this resource.",
+      "ok": "OK"
+    }
+  },
+  "newPassword": {
+    "title": "New Password",
+    "subtitle": "Enter your new password below",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "resetButton": "Reset Password",
+    "missingInfoTitle": "Missing information",
+    "missingVerificationInfo": "Email or verification code is missing.",
+    "passwordRequired": "Please enter and confirm your new password.",
+    "mismatchTitle": "Password mismatch",
+    "mismatchMessage": "Passwords do not match.",
+    "resetSuccess": "Password reset successfully."
+  },
+  "createTicket": {
+    "title": "Create Support Ticket",
+    "subject": "Subject",
+    "subjectHint": "Enter ticket subject",
+    "description": "Description",
+    "descriptionHint": "Describe your issue in detail",
+    "validationError": "Validation Error",
+    "subjectRequired": "Please enter a subject",
+    "descriptionRequired": "Please enter a description",
+    "createdSuccess": "Ticket created successfully",
+    "createFailed": "Failed to create ticket",
+    "createError": "An error occurred while creating the ticket",
+    "category": "Category",
+    "priority": "Priority",
+    "submit": "Submit Ticket",
+    "categories": {
+      "appIssue": "App Issue",
+      "account": "Account",
+      "safety": "Safety",
+      "other": "Other"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    }
+  },
+  "ticket": {
+    "supportChat": "Support Chat",
+    "myTickets": "My Tickets",
+    "newTicket": "New Ticket",
+    "createTicket": "Create Ticket",
+    "retry": "Retry",
+    "loadChatFailed": "Failed to load chat",
+    "loadTicketsFailed": "Failed to load tickets",
+    "noMessages": "No messages yet",
+    "typeMessage": "Type a message...",
+    "emptyTitle": "No Support Tickets",
+    "emptyMessage": "You haven't created any support tickets yet.\nTap the button below to get started.",
+    "sendMessageFailed": "Failed to send message",
+    "sendImageFailed": "Failed to send image",
+    "sendFileFailed": "Failed to send file",
+    "sendVoiceFailed": "Failed to send voice message",
+    "permissionDenied": "Permission Denied",
+    "microphonePermissionRequired": "Microphone permission is required to record voice messages",
+    "categories": {
+      "payment": "Payment",
+      "booking": "Booking",
+      "technical": "Technical",
+      "account": "Account",
+      "other": "Other"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "open": "Open",
+      "assigned": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": ":countm ago",
+      "hoursAgo": ":counth ago",
+      "daysAgo": ":countd ago"
+    }
+  },
+   "details": {
+    "description": "Description",
+    "related_products": "Related Products",
+    "product_specification": "Product Specification:",
+    "feature": "Feature:",
+    "package_content": "Package Content:",
+    "specification": "Specification",
+    "sku": "SKU:",
+    "category": "Category:",
+    "availability": "Availability:",
+    "product_type": "Product Type:",
+    "in_stock": "In Stock"
+  },
+  "filter": {
+    "title": "Filter",
+    "price": "Price",
+    "stock": "Stock",
+    "categories": "Categories",
+    "all": "All",
+    "in_stock": "In Stock",
+    "out_of_stock": "Out of Stock"
+  },
+  "cart": {
+    "title": "Shopping Bag",
+    "buy_bulk": "Buy :qty+ for Rs :price each",
+    "promo_hint": "Promo Code",
+    "apply": "Apply",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "bag_total": "Bag Total",
+    "items_count": "(:count items)",
+    "checkout_btn": "Proceed To Checkout",
+    "currency_pkr": "PKR"
+  },
+    "checkout": {
+    "title": "Checkout",
+    "shipping": "Shipping",
+    "payment": "Payment",
+    "review": "Review",
+    "full_name": "Full Name",
+    "phone_number": "Phone Number",
+    "select_province": "Select Province",
+    "select_city": "Select City",
+    "street_address": "Street Address",
+    "postal_code": "Postal Code",
+    "save_btn": "Save",
+    "card_holder_name": "Card Holder Name",
+    "expiration": "Expiration",
+    "cvv": "CVV",
+    "continue_btn": "Continue",
+    "items_count": "Items (:count)",
+    "shipping_address": "Shipping Address",
+    "mobile_number": "Mobile Number",
+    "province": "Province",
+    "city": "City",
+    "order_info": "Order Info",
+    "subtotal": "Subtotal",
+    "shipping_cost": "Shipping Cost",
+    "total": "Total",
+    "place_order_btn": "Place Order",
+    "enter_full_name": "Enter full name",
+    "enter_street": "Enter street address",
+    "enter_postal": "Enter postal code",
+    "enter_card_name": "Enter card holder name",
+    "mm_yy": "MM/YY"
+  },
+   "order_success": {
+    "title": "Your Order Has Been Placed\nSuccessfully",
+    "description": "Thank you for choosing us! Feel free to continue\nshopping and explore our wide range of products.\nHappy Shopping!",
+    "continue_btn": "Continue Shopping"
+  }
+}
+ 
