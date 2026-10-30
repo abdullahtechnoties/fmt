@@ -9,6 +9,7 @@ abstract class Routes {
   static const BOTTOMNAV = _Paths.BOTTOMNAV;
   static const ONBOARDING = _Paths.ONBOARDING;
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
+  static const PRODUCTS = _Paths.PRODUCTS;
   static const FILTER = _Paths.FILTER;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
@@ -23,7 +24,9 @@ abstract class Routes {
   static const SIGNUP = _Paths.SIGNUP;
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const ORDER_SUCCESS = _Paths.ORDER_SUCCESS;
+  static const ORDER_DETAILS = _Paths.ORDER_DETAILS;
   static const PRIVACY_POLICY = _Paths.PRIVACY_POLICY;
+  static const FAQS = _Paths.FAQS;
 
 }
 
@@ -35,6 +38,7 @@ abstract class _Paths {
   static const BOTTOMNAV = '/bottomnav';
   static const ONBOARDING = '/onboarding';
   static const PRODUCT_DETAILS = '/product-details';
+  static const PRODUCTS = '/products';
   static const FILTER = '/filter';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
@@ -49,5 +53,7 @@ abstract class _Paths {
   static const SIGNUP = '/signup';
   static const FORGOT_PASSWORD = '/forgot-password';
   static const ORDER_SUCCESS = '/order-success';
+  static const ORDER_DETAILS = '/order-details';
   static const PRIVACY_POLICY = '/privacy-policy';
+  static const FAQS = '/faqs';
 }

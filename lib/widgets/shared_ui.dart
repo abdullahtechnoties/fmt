@@ -40,6 +40,10 @@ class CustomHeaderBar extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onMenu;
   final bool showmenu;
+  /// null = auto: the back chevron shows only when this route can pop.
+  /// Bottom-nav tabs sit on the root route (canPop == false) so the chevron
+  /// hides there; the same screen pushed as an inner page keeps it.
+  final bool? showBack;
 
   const CustomHeaderBar({
     super.key,
@@ -47,25 +51,36 @@ class CustomHeaderBar extends StatelessWidget {
     this.onBack,
     this.onMenu,
     this.showmenu = true,
+    this.showBack,
   });
 
   @override
   Widget build(BuildContext context) {
+    final canPop = ModalRoute.of(context)?.canPop ?? true;
+    final show = showBack ?? canPop;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: R.w(20), vertical: R.h(16)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: onBack ?? () => Get.back(),
-            child: Icon(Icons.chevron_left_sharp, color: AppColors.black, size: R.sp(34)),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: R.sp(22),
-              fontWeight: FontWeight.w700,
-              color: AppColors.darkGrey,
+          if (show)
+            GestureDetector(
+              onTap: onBack ?? () => Get.back(),
+              child: Icon(Icons.chevron_left_sharp, color: AppColors.black, size: R.sp(34)),
+            ),
+          // else
+          //   SizedBox(width: R.sp(34)),
+          Expanded(
+
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: R.sp(22),
+                fontWeight: FontWeight.w700,
+                color: AppColors.darkGrey,
+                overflow: TextOverflow.ellipsis
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (showmenu)

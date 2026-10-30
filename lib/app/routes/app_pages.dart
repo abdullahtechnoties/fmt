@@ -1,5 +1,7 @@
 import 'package:fmt/app/modules/PrivacyPolicy/bindings/privacy_policy_binding.dart';
 import 'package:fmt/app/modules/PrivacyPolicy/views/privacy_policy_view.dart';
+import 'package:fmt/app/modules/faqs/bindings/faqs_binding.dart';
+import 'package:fmt/app/modules/faqs/views/faqs_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/bottomnav/bindings/bottomnav_binding.dart';
@@ -26,8 +28,12 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/menuDrawer/bindings/menu_drawer_binding.dart';
 import '../modules/menuDrawer/views/menu_drawer_view.dart';
+import '../modules/products/bindings/products_binding.dart';
+import '../modules/products/views/products_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
+import '../modules/orderDetails/bindings/order_details_binding.dart';
+import '../modules/orderDetails/views/order_details_view.dart';
 import '../modules/orderHistory/bindings/order_history_binding.dart';
 import '../modules/orderHistory/views/order_history_view.dart';
 import '../modules/orderSuccess/bindings/order_success_binding.dart';
@@ -82,6 +88,11 @@ class AppPages {
       binding: ProductDetailsBinding(),
     ),
     GetPage(
+      name: _Paths.PRODUCTS,
+      page: () => const ProductsView(),
+      binding: ProductsBinding(),
+    ),
+    GetPage(
       name: _Paths.FILTER,
       page: () => const FilterView(),
       binding: FilterBinding(),
@@ -110,6 +121,11 @@ class AppPages {
       name: _Paths.ORDER_HISTORY,
       page: () => const OrderHistoryView(),
       binding: OrderHistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDER_DETAILS,
+      page: () => const OrderDetailsView(),
+      binding: OrderDetailsBinding(),
     ),
     GetPage(
       name: _Paths.SUPPORT,
@@ -155,6 +171,11 @@ class AppPages {
       name: _Paths.PRIVACY_POLICY,
       page: () => const PrivacyPolicyView(),
       binding: PrivacyPolicyBinding(),
+    ),
+    GetPage(
+      name: _Paths.FAQS,
+      page: () => const FaqsView(),
+      binding: FaqsBinding(),
     ),
   ];
 }

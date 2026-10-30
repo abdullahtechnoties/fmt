@@ -7,6 +7,7 @@ import 'package:fmt/app/modules/categories/controllers/categories_controller.dar
 import 'package:fmt/app/modules/categories/views/categories_view.dart';
 import 'package:fmt/app/modules/home/controllers/home_controller.dart';
 import 'package:fmt/app/modules/home/views/home_view.dart';
+import 'package:fmt/app/modules/menuDrawer/controllers/menu_drawer_controller.dart';
 import 'package:fmt/app/modules/menuDrawer/views/menu_drawer_view.dart';
 import 'package:fmt/app/modules/profile/controllers/profile_controller.dart';
 import 'package:fmt/app/modules/profile/views/profile_view.dart';
@@ -65,6 +66,7 @@ class BottomnavView extends GetView<BottomnavController> {
   Widget build(BuildContext context) {
     Get.put(HomeController());
     Get.put(CategoriesController());
+    Get.put(MenuDrawerController());
     Get.put(CartController());
     Get.put(ProfileController());
 

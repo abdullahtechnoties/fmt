@@ -4,6 +4,7 @@ class PaginationMeta {
   final int total;
   final int perPage;
   final String? nextPageUrl;
+  final bool? hasMore;
 
   const PaginationMeta({
     required this.currentPage,
@@ -11,9 +12,16 @@ class PaginationMeta {
     required this.total,
     required this.perPage,
     this.nextPageUrl,
+    this.hasMore,
   });
 
-  bool get hasNextPage => nextPageUrl != null && currentPage < lastPage;
+  /// The products endpoint returns `has_more`; other payloads may return a
+  /// `next_page_url` instead. Prefer the explicit flag when present.
+  bool get hasNextPage {
+    if (currentPage >= lastPage) return false;
+    if (hasMore != null) return hasMore!;
+    return nextPageUrl != null;
+  }
 
   factory PaginationMeta.fromJson(Map<String, dynamic> json) {
     return PaginationMeta(
@@ -22,6 +30,7 @@ class PaginationMeta {
       total: _parseInt(json['total']) ?? 0,
       perPage: _parseInt(json['per_page']) ?? 10,
       nextPageUrl: json['next_page_url']?.toString(),
+      hasMore: json['has_more'] is bool ? json['has_more'] as bool : null,
     );
   }
 

@@ -26,6 +26,7 @@ class InputField extends StatelessWidget {
     this.suffixIcon,
     this.enabled = true,
     this.readOnly = false,
+    this.focusNode,
     this.maxLines = 1,
     this.minLines,
     this.textCapitalization = TextCapitalization.none,
@@ -55,6 +56,7 @@ class InputField extends StatelessWidget {
   final Iterable<String>? autofillHints;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final FocusNode? focusNode;
   final bool enabled;
   final bool readOnly;
   final int? maxLines;
@@ -113,6 +115,7 @@ class InputField extends StatelessWidget {
       autofillHints: autofillHints,
       enabled: enabled,
       readOnly: readOnly,
+      focusNode: focusNode,
       maxLines: obscureText ? 1 : maxLines,
       minLines: minLines,
       style: _fieldStyle,

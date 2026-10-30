@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
+import 'package:fmt/repositories/auth_repository.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
+import 'package:fmt/utilities/translation_extention.dart';
 import 'package:get/get.dart';
 
+/// Signup mirrors the website fields exactly: name, email, whatsapp,
+/// alternate_number, city, district, password + confirmation.
 class SignupController extends GetxController {
-  // Text Controllers
+  SignupController({AuthRepository? repository})
+      : _repository = repository ?? AuthRepository();
+
+  final AuthRepository _repository;
+
+  final formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
+  final whatsappController = TextEditingController();
+  final alternateNumberController = TextEditingController();
+  final cityController = TextEditingController();
+  final districtController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-  final forgotPasswordEmailController = TextEditingController();
 
-  // State
   final isPasswordHidden = true.obs;
   final isConfirmPasswordHidden = true.obs;
   final isLoading = false.obs;
+
+  /// Server-side field errors, keyed by API field name.
+  final fieldErrors = <String, String?>{}.obs;
 
   void togglePasswordVisibility() {
     isPasswordHidden.value = !isPasswordHidden.value;
@@ -23,45 +38,104 @@ class SignupController extends GetxController {
     isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
   }
 
-  // Dummy Methods
-  Future<void> performLogin() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    isLoading.value = false;
-    SnackbarService.showSuccess(
-      title: 'Success', 
-      message: 'Logged in gracefully!'
-    );
-    // Get.offAllNamed(Routes.HOME);
+  String? errorFor(String field) => fieldErrors[field];
+
+  String? required(String? v) =>
+      ((v ?? '').trim().isEmpty) ? 'auth.validation.required'.trns() : null;
+
+  String? validateEmail(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'auth.validation.emailRequired'.trns();
+    if (!GetUtils.isEmail(t)) return 'auth.validation.emailInvalid'.trns();
+    return null;
+  }
+
+  String? validatePhone(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'auth.validation.phoneRequired'.trns();
+    if (t.length < 7) return 'auth.validation.phoneInvalid'.trns();
+    return null;
+  }
+
+  String? validatePassword(String? v) {
+    if ((v ?? '').isEmpty) return 'auth.validation.passwordRequired'.trns();
+    if (v!.length < 6) return 'auth.validation.passwordMinLength'.trns();
+    return null;
+  }
+
+  String? validateConfirm(String? v) {
+    if ((v ?? '').isEmpty) {
+      return 'auth.validation.confirmPasswordRequired'.trns();
+    }
+    if (v != passwordController.text) {
+      return 'auth.validation.passwordMismatch'.trns();
+    }
+    return null;
   }
 
   Future<void> performSignUp() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    fieldErrors.clear();
+    if (!(formKey.currentState?.validate() ?? false)) return;
+    if (isLoading.value) return;
+
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    isLoading.value = false;
-    SnackbarService.showSuccess(
-      title: 'Success', 
-      message: 'Account created successfully!'
-    );
-    Get.toNamed(Routes.BOTTOMNAV);
+    try {
+      final res = await _repository.register(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        whatsapp: whatsappController.text.trim(),
+        alternateNumber: alternateNumberController.text.trim(),
+        city: cityController.text.trim(),
+        district: districtController.text.trim(),
+        password: passwordController.text,
+        passwordConfirmation: confirmPasswordController.text,
+        deviceName: 'android-app',
+      );
+      if (res.isError || res.data == null) {
+        _mapErrors(res.errors);
+        final fallback = (res.message ?? '').isNotEmpty
+            ? res.message!
+            : 'auth.signup.errorTitle'.trns();
+        SnackbarService.showError(
+          title: 'auth.signup.errorTitle'.trns(),
+          message: fieldErrors.values.firstWhere(
+            (e) => e != null && e.isNotEmpty,
+            orElse: () => fallback,
+          )!,
+        );
+        return;
+      }
+      await _repository.persistSession(res.data!);
+      SnackbarService.showSuccess(
+        title: 'auth.signup.successTitle'.trns(),
+        message: 'auth.signup.successMessage'.trns(),
+      );
+      Get.offAllNamed(Routes.BOTTOMNAV);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  Future<void> performForgotPassword() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    isLoading.value = false;
-    SnackbarService.showSuccess(
-      title: 'Email Sent', 
-      message: 'Check your email to reset password.'
-    );
+  void _mapErrors(Map<String, List<String>>? errors) {
+    if (errors == null || errors.isEmpty) return;
+    final mapped = <String, String?>{};
+    errors.forEach((key, list) {
+      if (list.isNotEmpty) mapped[key] = list.first;
+    });
+    fieldErrors.assignAll(mapped);
   }
-  
+
   @override
   void onClose() {
+    nameController.dispose();
     emailController.dispose();
+    whatsappController.dispose();
+    alternateNumberController.dispose();
+    cityController.dispose();
+    districtController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    forgotPasswordEmailController.dispose();
     super.onClose();
   }
 }

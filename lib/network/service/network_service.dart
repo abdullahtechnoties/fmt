@@ -4,6 +4,8 @@ import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/network/api/api_path.dart';
 import 'package:fmt/network/response/api_response.dart';
 import 'package:fmt/network/service/auth_service.dart';
+import 'package:fmt/network/service/local_storage.dart';
+import 'package:fmt/utilities/app_strings.dart';
 import 'package:fmt/utilities/colors.dart';
 import 'package:fmt/utilities/png_assets.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
@@ -56,6 +58,22 @@ class NetworkService extends GetxService {
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
+    // FMT branch context: every catalog/cart call is scoped by X-Store-Id.
+    // Read straight from prefs (no Get lookup) to avoid dependency cycles —
+    // StoreService writes the selected branch id here on every change.
+    final storeId =
+        LocalStorageService.prefs?.getInt(AppStrings.selectedStoreId);
+    if (storeId != null && !options.headers.containsKey('X-Store-Id')) {
+      options.headers['X-Store-Id'] = storeId.toString();
+    }
+    // Guest carts are identified by X-Cart-Token; harmless to send when authed.
+    final cartToken =
+        LocalStorageService.prefs?.getString(AppStrings.cartToken);
+    if (cartToken != null &&
+        cartToken.isNotEmpty &&
+        !options.headers.containsKey('X-Cart-Token')) {
+      options.headers['X-Cart-Token'] = cartToken;
+    }
     _log(options.headers.toString());
     _log('${options.method}  ${options.uri}', icon: '📤');
     if (options.data != null) _log('Body → ${options.data}', icon: '📦');
@@ -78,9 +96,14 @@ class NetworkService extends GetxService {
   Future<ApiResponse<Map<String, dynamic>>> get({
     required String endpoint,
     Map<String, dynamic>? queryParams,
+    Map<String, dynamic>? extraHeaders,
   }) async {
     try {
-      final response = await _dio.get(endpoint, queryParameters: queryParams);
+      final response = await _dio.get(
+        endpoint,
+        queryParameters: queryParams,
+        options: extraHeaders != null ? Options(headers: extraHeaders) : null,
+      );
       return _processResponse(response);
     } on DioException catch (e) {
       return _processDioException(e);
@@ -97,13 +120,14 @@ class NetworkService extends GetxService {
     required String endpoint,
     Map<String, dynamic>? body,
     String? contentType,
+    Map<String, dynamic>? extraHeaders,
   }) async {
     try {
       final response = await _dio.post(
         endpoint,
         data: body,
-        options: contentType != null
-            ? Options(contentType: contentType)
+        options: contentType != null || extraHeaders != null
+            ? Options(contentType: contentType, headers: extraHeaders)
             : null,
       );
       return _processResponse(response);
@@ -168,12 +192,13 @@ class NetworkService extends GetxService {
     Map<String, dynamic>? body,
     // content type 
     String? contentType,
+    Map<String, dynamic>? extraHeaders,
   }) async {
     try {
       final response = await _dio.put(
         endpoint, data: body
-        , options: contentType != null
-            ? Options(contentType: contentType)
+        , options: contentType != null || extraHeaders != null
+            ? Options(contentType: contentType, headers: extraHeaders)
             : null,
       );
       return _processResponse(response);
@@ -211,9 +236,14 @@ class NetworkService extends GetxService {
   Future<ApiResponse<Map<String, dynamic>>> patch({
     required String endpoint,
     Map<String, dynamic>? body,
+    Map<String, dynamic>? extraHeaders,
   }) async {
     try {
-      final response = await _dio.patch(endpoint, data: body);
+      final response = await _dio.patch(
+        endpoint,
+        data: body,
+        options: extraHeaders != null ? Options(headers: extraHeaders) : null,
+      );
       return _processResponse(response);
     } on DioException catch (e) {
       return _processDioException(e);
@@ -226,9 +256,14 @@ class NetworkService extends GetxService {
   Future<ApiResponse<Map<String, dynamic>>> delete({
     required String endpoint,
     Map<String, dynamic>? body,
+    Map<String, dynamic>? extraHeaders,
   }) async {
     try {
-      final response = await _dio.delete(endpoint, data: body);
+      final response = await _dio.delete(
+        endpoint,
+        data: body,
+        options: extraHeaders != null ? Options(headers: extraHeaders) : null,
+      );
       return _processResponse(response);
     } on DioException catch (e) {
       return _processDioException(e);

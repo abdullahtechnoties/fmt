@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
-import 'package:fmt/models/dummy_models.dart';
+import 'package:fmt/models/catalog_model.dart';
 import 'package:fmt/utilities/responsive/responsive_util.dart';
 import 'package:fmt/utilities/translation_extention.dart';
 import 'package:fmt/widgets/app_cached_image.dart';
@@ -17,13 +17,13 @@ final _currencyFormat = NumberFormat('#,##0', 'en_US');
 
 // --- Top Header Widget ---
 class HomeTopHeader extends StatelessWidget {
-  final String profileImageUrl;
+  final String? profileImageUrl;
   final VoidCallback onSearchTap;
   final VoidCallback onMenuTap;
 
   const HomeTopHeader({
     super.key,
-    required this.profileImageUrl,
+    this.profileImageUrl,
     required this.onSearchTap,
     required this.onMenuTap,
   });
@@ -59,11 +59,7 @@ class HomeTopHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: R.h(20),
-                    backgroundColor: AppColors.white,
-                    backgroundImage: NetworkImage(profileImageUrl),
-                  ),
+                  _Avatar(imageUrl: profileImageUrl),
                   SizedBox(width: R.w(10)),
                   GestureDetector(
                     onTap: onMenuTap,
@@ -75,6 +71,32 @@ class HomeTopHeader extends StatelessWidget {
           ],
         )
       ],
+    );
+  }
+}
+
+// --- Avatar Widget (null-safe profile image) ---
+class _Avatar extends StatelessWidget {
+  const _Avatar({this.imageUrl});
+
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl?.trim();
+    if (url == null || url.isEmpty) {
+      return CircleAvatar(
+        radius: R.h(20),
+        backgroundColor: AppColors.white,
+        child: Icon(Icons.person, color: AppColors.primary, size: R.sp(22)),
+      );
+    }
+    return CircleAvatar(
+      radius: R.h(20),
+      backgroundColor: AppColors.white,
+      backgroundImage: NetworkImage(url),
+      onBackgroundImageError: (_, __) {},
+      child: const SizedBox.shrink(),
     );
   }
 }
@@ -158,9 +180,10 @@ class PromoBanner extends StatelessWidget {
 
 // --- Category Card Widget ---
 class CategoryCard extends StatelessWidget {
-  final CategoryModel category;
+  final CatalogCategory category;
+  final VoidCallback? onBrowse;
 
-  const CategoryCard({super.key, required this.category});
+  const CategoryCard({super.key, required this.category, this.onBrowse});
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +208,7 @@ class CategoryCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(R.w(12)),
             child: AppCachedImage(
-              imageUrl: category.imageUrl,
+              imageUrl: category.image,
               width: R.w(130),
               height: R.h(130),
               borderRadius: BorderRadius.circular(R.w(12)),
@@ -202,7 +225,7 @@ class CategoryCard extends StatelessWidget {
                 children: [
                   SizedBox(height: R.h(18)),
                   Text(
-                    category.title,
+                    category.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -214,7 +237,7 @@ class CategoryCard extends StatelessWidget {
                   ),
                   SizedBox(height: R.h(6)),
                   Text(
-                    'home.products_count'.trnsFormat({'count': category.productCount}),
+                    'home.products_count'.trnsFormat({'count': category.productsCount}),
                     style: TextStyle(
                       fontSize: R.sp(14),
                       fontWeight: FontWeight.w500,
@@ -226,7 +249,7 @@ class CategoryCard extends StatelessWidget {
                     width: R.w(100),
                     height: R.h(30),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: onBrowse,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         elevation: 0,
@@ -258,23 +281,31 @@ class CategoryCard extends StatelessWidget {
 
 // --- Product Card Widget (Used for Grid and Horizontal list) ---
 class ProductCard extends StatelessWidget {
-  final ProductModel product;
-  final VoidCallback onAddTap;
+  final CatalogProduct product;
+  final VoidCallback? onAddTap;
   final double? width;
 
   const ProductCard({
-    super.key, 
-    required this.product, 
-    required this.onAddTap,
+    super.key,
+    required this.product,
+    this.onAddTap,
     this.width,
   });
+
+  /// The add button only renders for simple products — variable products
+  /// must go through the details page to pick options.
+  bool get _showAddButton => onAddTap != null && !product.isVariable;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product details page
-        Get.toNamed(Routes.PRODUCT_DETAILS, arguments: product);
+        // Same route, different product (e.g. related items) must still push.
+        Get.toNamed(
+          Routes.PRODUCT_DETAILS,
+          arguments: product.slug ?? product.id,
+          preventDuplicates: false,
+        );
       },
       child: Container(
         width: width,
@@ -284,7 +315,7 @@ class ProductCard extends StatelessWidget {
           border: Border.all(color: AppColors.cardBorder),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.02),
+              color: AppColors.black.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -304,7 +335,7 @@ class ProductCard extends StatelessWidget {
                     border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: AppCachedImage(
-                    imageUrl: product.imageUrl,
+                    imageUrl: product.thumbnail,
                     height: R.h(120),
                     width: double.infinity,
                     fit: BoxFit.contain,
@@ -337,7 +368,9 @@ class ProductCard extends StatelessWidget {
                       Icon(Icons.star, color: AppColors.star, size: R.sp(14)),
                       SizedBox(width: R.w(2)),
                       Text(
-                        '(${product.rating.toString()})',
+                        product.rating > 0
+                            ? '(${product.rating.toString()})'
+                            : '',
                         style: TextStyle(
                           fontSize: R.sp(12),
                           fontWeight: FontWeight.w500,
@@ -352,7 +385,7 @@ class ProductCard extends StatelessWidget {
               
               // Category subtitle
               Text(
-                product.category,
+                product.categoryName ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -368,25 +401,41 @@ class ProductCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    '${'home.currency_symbol'.trns()}${_currencyFormat.format(product.price)}',
-                    style: TextStyle(
-                      fontSize: R.sp(16),
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.darkGrey,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: onAddTap,
-                    child: Container(
-                      padding: EdgeInsets.all(R.w(6)),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (product.hasDiscount)
+                        Text(
+                          '${'home.currency_symbol'.trns()}${_currencyFormat.format(product.regularPrice)}',
+                          style: TextStyle(
+                            fontSize: R.sp(12),
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.lightGrey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      Text(
+                        '${'home.currency_symbol'.trns()}${_currencyFormat.format(product.effectivePrice)}',
+                        style: TextStyle(
+                          fontSize: R.sp(16),
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.darkGrey,
+                        ),
                       ),
-                      child: Icon(Icons.add, color: AppColors.white, size: R.sp(20)),
-                    ),
-                  )
+                    ],
+                  ),
+                  if (_showAddButton)
+                    GestureDetector(
+                      onTap: onAddTap,
+                      child: Container(
+                        padding: EdgeInsets.all(R.w(6)),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.add, color: AppColors.white, size: R.sp(20)),
+                      ),
+                    )
                 ],
               )
             ],

@@ -15,6 +15,15 @@ class AppStrings {
   static String vendorProfile = "vendor_profile";
   //END DON'T TOUNCH
 
+  // ─── FMT Store App keys ───
+  static String selectedStoreId = "fmt_selected_store_id";
+  static String storeListCache = "fmt_store_list";
+  static String bootstrapCache = "fmt_bootstrap";
+  static String cartToken = "fmt_cart_token";
+  static String whatsappGeneral = "fmt_whatsapp_general";
+  static String whatsappOrder = "fmt_whatsapp_order";
+  static String guestMode = "fmt_guest_mode";
+
 
 
   

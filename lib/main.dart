@@ -3,6 +3,7 @@ import 'package:fmt/fmtapp.dart';
 import 'package:fmt/network/service/auth_service.dart';
 import 'package:fmt/network/service/local_storage.dart';
 import 'package:fmt/network/service/network_service.dart';
+import 'package:fmt/services/store_service.dart';
 import 'package:fmt/services/translation_service.dart';
 import 'package:fmt/utilities/theme/theme_controller.dart';
 import 'package:get/get.dart';
@@ -22,6 +23,7 @@ Future<void> _initializeServices() async {
   await authService.ready;
   Get.put(ThemeController());
   Get.put(NetworkService());
+  Get.put(StoreService());
   // await NotificationService.instance.init();
   // Stripe.publishableKey = PaymentConfig.stripePublishableKey;
   // await Stripe.instance.applySettings();

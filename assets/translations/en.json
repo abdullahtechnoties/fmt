@@ -3,10 +3,17 @@
 
   "categories":{
     "title": "Categories",
-    "search_hint": "Search"
+    "search_hint": "Search",
+    "all_products": "All Products",
+    "load_failed": "Couldn't load categories. Pull to refresh.",
+    "empty_title": "No categories yet",
+    "no_results": "No categories match \":query\""
   },
   "profile":{
     "title": "My Profile",
+    "guest": "Guest",
+    "logout_title": "Logout?",
+    "logout_message": "Are you sure you want to log out of your account?",
     "personal_info": "Personal Information",
     "my_profile": "My Profile",
     "shipping_address": "Shipping Address",
@@ -17,11 +24,29 @@
     "terms_conditions": "Terms & Conditions",
     "faqs": "FAQs",
     "account_management": "Account Management",
-    "change_password": "Change Password"
+    "change_password": "Change Password",
+    "logout_btn": "Logout",
+    "delivery_title": "Delivery Address",
+    "delivery_hint": "You have one delivery address — saving overwrites it.",
+    "delivery_placeholder": "House, street, area, city...",
+    "delivery_save": "Save Address",
+    "address_saved": "Delivery address saved.",
+    "address_save_failed": "Couldn't save the address. Please try again."
   },
   "order_history": {
     "title": "Order History",
-    "buy_bulk": "Buy :qty+ for Rs :price each"
+    "buy_bulk": "Buy :qty+ for Rs :price each",
+    "load_failed": "Couldn't load your orders. Pull to retry.",
+    "empty_title": "No orders yet",
+    "empty_message": "Your orders will appear here once you place one."
+  },
+  "order_details": {
+    "title": "Order Details",
+    "load_failed": "Couldn't load this order. Please try again.",
+    "items": "Items (:count)",
+    "subtotal": "Subtotal",
+    "invoice_btn": "View Invoice",
+    "invoice_failed": "Couldn't open the invoice. Please try again."
   },
   "support":{
     "title": "Support",
@@ -51,10 +76,28 @@
    "dob_hint": "DD/MM/YYYY",
    "gender": "Gender",
    "gender_hint": "Select Gender",
+   "alternate": "Alternate Number",
+   "alternate_hint": "+92 000-0000000",
+   "load_failed": "Couldn't load your profile. Pull to retry.",
+   "save_failed": "Couldn't save your profile. Please try again.",
+   "saved": "Profile updated successfully.",
+   "billing_title": "Billing Address",
+   "billing_hint": "Used at checkout — saving overwrites the previous one.",
+   "billing_name": "Full Name",
+   "billing_phone": "Phone Number",
+   "billing_address": "Billing Address",
+   "billing_address_hint": "House, street, area, city...",
+   "billing_save": "Save Billing Address",
+   "billing_saved": "Billing address saved.",
+   "billing_failed": "Couldn't save the billing address. Please try again.",
+   "billing_incomplete": "Please fill all required billing fields.",
    "save": "Save"
   },
   "password":{
     "title": "Change Password",
+    "subtitle": "Enter your current password and choose a new one (min 6 characters).",
+    "save_failed": "Couldn't change the password. Please try again.",
+    "saved": "Password changed successfully.",
     "old": "Old Password",
     "old_hint": "Enter Old Password",
     "new_pass": "New Password",
@@ -73,7 +116,24 @@
     "shop": "Shop",
     "categories": "Categories",
     "cart": "Cart",
-    "profile": "Profile"
+    "profile": "Profile",
+    "support": "Support",
+    "logout": "Logout",
+    "no_categories": "No categories yet"
+  },
+  "branch": {
+    "select": "Select Branch",
+    "select_hint": "Prices and stock depend on your branch",
+    "current": "Shopping at",
+    "switch_title": "Switch Branch?",
+    "switch_message": "Changing branch will clear your cart because prices and stock differ per branch.",
+    "switch_confirm": "Switch & Clear",
+    "switch_failed_title": "Could not switch",
+    "switch_failed": "Please try again after clearing your cart.",
+    "switched_title": "Branch switched",
+    "switched": "Now shopping at :name",
+    "unavailable_title": "No branches",
+    "unavailable": "Branch list is still loading. Please try again."
   },
   "welcome": {
     "title": "Welcome to",
@@ -155,6 +215,7 @@
     "slide_3_desc": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit."
   },
   "auth": {
+    "skip": "Skip",
     "welcome_back": "Welcome Back!",
     "username_email_hint": "Username or Email",
     "password_hint": "Password",
@@ -171,6 +232,11 @@
     "create_account_btn": "Create Account",
     "have_account": "I Already Have an Account ",
     "login_link": "Login",
+    "required_title": "Login Required",
+    "required_message": "Please log in to your account to continue.",
+    "required_login": "Login",
+    "required_checkout": "Please log in to proceed to checkout.",
+    "required_profile": "Log in to view your profile, orders and saved details.",
     "forgot_password_title": "Forgot Password?",
     "email_hint": "Enter your email address",
     "reset_password_desc": "* We will send you a message to set or reset your new password",
@@ -178,6 +244,9 @@
     "login": {
       "title": "Let's Sign You In",
       "subtitle": "Welcome back, you've\nbeen missed!",
+      "emailMode": "Email",
+      "whatsappMode": "WhatsApp",
+      "whatsappHint": "WhatsApp number",
       "loginLabel": "Email or Phone",
       "loginHint": "Enter your email or phone",
       "companyIdLabel": "Company Id",
@@ -204,6 +273,10 @@
       "subtitle": "Seems you are new here,\nLet's set up your profile.",
       "fullNameLabel": "Full Name",
       "emailLabel": "Email Address",
+      "whatsappLabel": "WhatsApp Number",
+      "alternateLabel": "Alternate Number",
+      "cityLabel": "City",
+      "districtLabel": "District",
       "addressLabel": "Current Address",
       "zipCodeLabel": "Zip Code",
       "stateLabel": "State",
@@ -221,8 +294,11 @@
       "termsError": "Please agree to the Terms and Conditions to continue."
     },
     "validation": {
+      "required": "Please fill out this field",
       "loginRequired": "Email or phone number is required",
       "loginInvalid": "Please enter a valid email or phone number",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Please enter a valid phone number",
       "companyIdRequired": "Company id is required",
       "fullNameRequired": "Full name is required",
       "emailRequired": "Email address is required",
@@ -234,6 +310,12 @@
       "passwordMinLength": "Password must be at least 6 characters",
       "confirmPasswordRequired": "Please confirm your password",
       "passwordMismatch": "Passwords do not match"
+    },
+    "forgot": {
+      "errorTitle": "Request Failed",
+      "successTitle": "Email Sent",
+      "successMessage": "Check your email for the password reset link.",
+      "checkInbox": "Reset link sent! Check your inbox (and spam folder). Open the link to set a new password, then come back and log in."
     }
   },
   "onboard": {
@@ -253,6 +335,8 @@
   },
   "home": {
     "categories": "Categories",
+    "load_failed_title": "Couldn't load home",
+    "load_failed": "Check your connection and pull to refresh.",
     "view_all": "View all",
     "featured_products": "Featured Products",
     "special_products": "Special Products",
@@ -262,6 +346,7 @@
     "banner_title": "FMT Online Store",
     "banner_subtitle": "Mobile Spare\nParts at the Best\nPrices",
     "currency_symbol": "Rs ",
+    "search_title": "Search Products",
     "greeting": "Bookats Awaits:",
     "greetingSubtitle": "Book Your Appointment Today!",
     "searchHint": "Search Something",
@@ -549,11 +634,38 @@
     "name": "FMT"
   },
   "common": {
+    "retry": "Try Again",
     "yes": "Yes",
     "no": "No",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
     "success": "Success",
     "error": "Error",
     "loadingFilters": "Loading filters…"
+  },
+  "products": {
+    "all_products": "All Products",
+    "search_hint": "Search products...",
+    "load_failed_title": "Couldn't load products",
+    "load_failed": "Check your connection and try again.",
+    "results_count": ":count products",
+    "all": "All",
+    "filter_title": "Filters",
+    "sort_by": "Sort by",
+    "sort_latest": "Latest",
+    "sort_price_low": "Price: Low to High",
+    "sort_price_high": "Price: High to Low",
+    "sort_name_asc": "Name: A to Z",
+    "sort_name_desc": "Name: Z to A",
+    "availability": "Availability",
+    "stock_all": "All products",
+    "stock_in_stock": "In stock",
+    "stock_out_of_stock": "Out of stock",
+    "clear": "Clear",
+    "apply": "Apply",
+    "empty_title": "No products found",
+    "empty_message": "Try a different search or clear the filters.",
+    "clear_filters": "Clear filters"
   },
   "permissions": {
     "noAccess": {
@@ -649,6 +761,19 @@
   },
    "details": {
     "description": "Description",
+    "load_failed": "Couldn't load this product. Please try again.",
+    "add_to_cart": "Add to Cart",
+    "select_options": "Select options to continue",
+    "select_options_title": "Choose options",
+    "choose_option": "Choose",
+    "quantity": "Quantity",
+    "only_left": "Only :count left",
+    "total": "Total",
+    "out_of_stock": "Out of Stock",
+    "bulk_hint": "Buy :qty+ for :price each",
+    "stock_qty": "Stock:",
+    "type_variable": "Variable",
+    "type_simple": "Simple",
     "related_products": "Related Products",
     "product_specification": "Product Specification:",
     "feature": "Feature:",
@@ -671,22 +796,54 @@
   },
   "cart": {
     "title": "Shopping Bag",
+    "out_of_stock_title": "Out of stock",
+    "out_of_stock": "This item is not available at your branch right now.",
+    "added_title": "Added to cart",
+    "added": ":title added to your cart.",
+    "bulk_applied": "Bulk price applied (:price each)",
     "buy_bulk": "Buy :qty+ for Rs :price each",
     "promo_hint": "Promo Code",
+    "load_failed": "Couldn't load your cart. Pull to refresh.",
+    "empty_title": "Your bag is empty",
+    "empty_message": "Looks like you haven't added anything yet. Explore products and find something you love.",
+    "browse_btn": "Browse Products",
+    "updated": "Cart updated.",
+    "removed": "Item removed from your cart.",
+    "update_failed": "Couldn't update the quantity. Please try again.",
+    "remove_failed": "Couldn't remove the item. Please try again.",
     "apply": "Apply",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "bag_total": "Bag Total",
     "items_count": "(:count items)",
     "checkout_btn": "Proceed To Checkout",
-    "currency_pkr": "PKR"
+    "currency_pkr": "PKR",
+    "taxes_note": "Shipping & taxes calculated by the store"
   },
     "checkout": {
     "title": "Checkout",
     "shipping": "Shipping",
     "payment": "Payment",
     "review": "Review",
+    "before_place_title": "Before You Place Your Order",
+    "before_place_subtitle": "After placing your order, you have to contact us on WhatsApp or Chat for order confirmation. A partial / advance payment is required - your order will be processed and dispatched once the advance payment is received.",
+    "confirm_ack": "I understand that I have to contact the team on WhatsApp and a partial advance payment is required to confirm my order.",
+    "confirm_ack_required": "Please confirm that you understand the order confirmation process.",
     "full_name": "Full Name",
+    "email": "Email",
+    "enter_email": "Enter email address",
+    "enter_city": "Enter city",
+    "enter_province": "Enter province",
+    "country": "Country",
+    "enter_country": "Enter country",
+    "order_notes": "Order Notes (Optional)",
+    "enter_notes": "Anything the store should know?",
+    "summary_failed": "Couldn't load the checkout summary. Pull to retry.",
+    "cod_title": "Cash on Delivery",
+    "cod_subtitle": "Pay when you receive your order",
+    "cod_note": "Pay in cash when your order arrives. Our team will message you on WhatsApp to confirm your order and the advance.",
+    "order_failed_title": "Order Failed",
+    "order_failed": "Couldn't place your order. Please try again.",
     "phone_number": "Phone Number",
     "select_province": "Select Province",
     "select_city": "Select City",
@@ -716,6 +873,11 @@
    "order_success": {
     "title": "Your Order Has Been Placed\nSuccessfully",
     "description": "Thank you for choosing us! Feel free to continue\nshopping and explore our wide range of products.\nHappy Shopping!",
+    "order_no": "Order",
+    "status": "Status",
+    "status_pending": "Pending",
+    "whatsapp_note": "After placing your order, you have to contact us on WhatsApp or Chat for order confirmation. A partial / advance payment is required - your order will be processed and dispatched once the advance payment is received.",
+    "whatsapp_btn": "Confirm on WhatsApp",
     "continue_btn": "Continue Shopping"
   }
 }

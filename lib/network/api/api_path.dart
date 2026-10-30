@@ -1,13 +1,64 @@
 class ApiPath {
-  // // Common Endpoints
-  static const String baseUrl = 'https://orgina.screenlinktechnologies.com/api';
-  static const String imageUrl = 'https://orgina.screenlinktechnologies.com/storage';
-  
-  // Local Endpoints
-  // static const String baseUrl =
-  //     'https://subregular-lauretta-nonprovocatively.ngrok-free.dev/api';
-  // static const String imageUrl =
-  //     'https://subregular-lauretta-nonprovocatively.ngrok-free.dev/storage';
+  // ─── FMT Store App API (v1) ────────────────────────────────────────────────
+  // Base URL: https://www.fmtonlinestore.com/api/v1
+  // Auth: Laravel Sanctum (Bearer). Currency: PKR.
+  static const String baseUrl = 'https://www.fmtonlinestore.com/api/v1';
+
+  /// Fallback host used to resolve relative image paths.
+  static const String imageUrl = 'https://www.fmtonlinestore.com/storage';
+
+  // Bootstrap / app config
+  static const String bootstrap = '/bootstrap';
+
+  // Auth
+  static const String register = '/auth/register';
+  static const String login = '/auth/login';
+  static const String me = '/auth/me';
+  static const String logout = '/auth/logout';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String resetPassword = '/auth/reset-password';
+  static const String deleteAccount = '/auth/account';
+
+  // Stores (branches)
+  static const String stores = '/stores';
+  static String storeDetail(String slug) => '/stores/$slug';
+  static String storeProducts(String slug) => '/stores/$slug/products';
+
+  // Catalog
+  static const String home = '/home';
+  static const String categories = '/categories';
+  static const String products = '/products';
+  static String productDetail(String slug) => '/products/$slug';
+  static const String productSearch = '/search/products';
+  static String productResolve(Object id) => '/products/resolve/$id';
+
+  // Cart (guest + authed; server-side, identified by X-Cart-Token / Bearer)
+  static const String cart = '/cart';
+  static const String cartItems = '/cart/items';
+  static String cartItem(String cartKey) => '/cart/items/$cartKey';
+  static const String cartMerge = '/cart/merge';
+
+  // Checkout & orders
+  static const String checkoutSummary = '/checkout/summary';
+  static const String orders = '/orders';
+  static String orderDetail(Object id) => '/orders/$id';
+  static String orderInvoice(Object id) => '/orders/$id/invoice';
+
+  // Account
+  static const String accountProfile = '/account/profile';
+  static const String accountAddresses = '/account/addresses';
+  static const String accountBillingAddress = '/account/addresses/billing';
+  static const String accountDeliveryAddress = '/account/addresses/delivery';
+
+  // Content
+  static String page(String slug) => '/pages/$slug';
+  static const String blogs = '/blogs';
+  static String blogDetail(String slug) => '/blogs/$slug';
+  static const String testimonials = '/testimonials';
+  static const String contact = '/contact';
+
+  // ─── Legacy (pre-FMT) endpoint constants ───────────────────────────────────
+  // Kept so untouched modules still compile; they are migrated module-wise.
 
   // Currency Converter Key
   static const String currencyConverterKey = '14e9eb5ef84310db91a22a8d';
@@ -27,9 +78,9 @@ class ApiPath {
 
   // Common Endpoints
   static const String getSetupFcm = '/users/fcm-token';
-  static String userProfile(int userId) => '/users/$userId'  ;
-  static const String deleteAccount = '/users';
-  
+  static String userProfile(int userId) => '/users/$userId';
+  static const String legacyDeleteAccount = '/users';
+
   // Product Request Endpoints
   static const String productRequests = '/product-requests';
   static String productRequestDetails(int id) => '/product-requests/$id';
@@ -56,16 +107,15 @@ class ApiPath {
   static const String dataAttributes = '/data/attributes';
 
   // Product Endpoints
-  static const String products = '/products';
-  static String productDetail(Object id) => '/products/$id';
+  static const String legacyProducts = '/products-legacy';
   static String productUpdate(Object id) => '/products/$id';
   static String productDelete(Object id) => '/products/$id';
   static String productToggleActive(Object id) => '/products/$id/toggle-active';
 
   // Cart Endpoints
-  static const String cart = '/cart';
-  static const String cartItems = '/cart-items';
-  static String cartItem(Object id) => '/cart-items/$id';
+  static const String legacyCart = '/cart-legacy';
+  static const String legacyCartItems = '/cart-items';
+  static String legacyCartItem(Object id) => '/cart-items/$id';
 
   // Voucher Endpoints
   static const String voucherApply = '/vouchers/apply';
@@ -74,17 +124,15 @@ class ApiPath {
   static const String shippingMethodsActive = '/shipping-methods-active';
   static const String settings = '/settings';
   static String userDetail(Object id) => '/users/$id';
-  static const String orders = '/orders';
   static String orderPay(Object id) => '/orders/$id/pay';
-    static String orderStripeConfirm(Object id) => '/orders/$id/pay/stripe/confirm';
-  static String orderDetail(Object id) => '/orders/$id';
+  static String orderStripeConfirm(Object id) =>
+      '/orders/$id/pay/stripe/confirm';
   static String orderReorder(Object id) => '/orders/$id/reorder';
 
   // Rating Endpoints
   static const String ratings = '/ratings';
 
   // Categories & Brands Endpoints
-  static const String categories = '/categories';
   static String categoryDetail(Object id) => '/categories/$id';
   static const String brands = '/brands';
 
@@ -95,28 +143,22 @@ class ApiPath {
   // Wishlist Endpoints
   static const String wishlistToggle = '/wishlists';
   static const String wishlists = '/wishlists';
-  static String wishlistDelete(int productId) => '/wishlists/product/$productId';
+  static String wishlistDelete(int productId) =>
+      '/wishlists/product/$productId';
 
-  // Auth Endpoints
-  static const String register = '/register';
+  // Legacy auth Endpoints
+  static const String legacyRegister = '/register';
   static const String verifyEmail = '/verify-email';
   static const String resendCode = '/resend-code';
-  static const String login = '/login';
-  static const String logout = '/logout';
-  static const String forgotPassword = '/forgot-password';
-  static const String resetPassword = '/reset-password';
+  static const String legacyLogin = '/login';
+  static const String legacyLogout = '/logout';
+  static const String legacyForgotPassword = '/forgot-password';
+  static const String legacyResetPassword = '/reset-password';
   static const String changePassword = '/change-password';
   static const String profileUpdate = '/profile/update';
   static const String profileComplete = '/profile';
   static const String sendResetCode = '/resend-code';
   static const String profileImage = '/profile/image';
-
-
-  // Geo (Unauthenticated)
-  // static const String countries = '/countries';
-  // static String countryStates(int countryId) => '/states?country_id=$countryId';
-  // static String stateCities(int stateId) => '/cities?state_id=$stateId';
-  // static String cityAreas(int cityId) => '/areas?city_id=$cityId';
 
   // Shipping Address Endpoints
   static const String shippingAddresses = '/shipping-addresses';
@@ -145,6 +187,4 @@ class ApiPath {
 
   // Vendor dashboard (?range=today|yesterday|this_week|this_month|this_year)
   static const String vendorDashboard = '/dashboard';
-
 }
-

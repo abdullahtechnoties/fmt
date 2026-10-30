@@ -1,0 +1,905 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>FMT Store App API</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  /* Layout: single reading column, sticky section nav, endpoint blocks as flat
+     rows with a method badge rail. Technical reference, not marketing. */
+  :root {
+    --bg:        #f7f8fa;
+    --surface:   #ffffff;
+    --surface-2: #eef1f5;
+    --fg:        #141922;
+    --fg-muted:  #5a6472;
+    --fg-faint:  #868f9d;
+    --line:      #d8dee7;
+    --accent:    #0f6e72;
+    --accent-ink:#ffffff;
+    --code-bg:   #10161f;
+    --code-fg:   #dfe6ef;
+    --get:       #1a5fb4;
+    --post:      #1a7f45;
+    --patch:     #8a5a00;
+    --del:       #a52020;
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0d1117;
+      --surface:   #151b23;
+      --surface-2: #1d242e;
+      --fg:        #e6ebf2;
+      --fg-muted:  #a0abba;
+      --fg-faint:  #717d8c;
+      --line:      #2a323d;
+      --accent:    #4fd1c5;
+      --accent-ink:#06211f;
+      --code-bg:   #0a0f16;
+      --code-fg:   #dfe6ef;
+      --get:       #7eb3f5;
+      --post:      #68d391;
+      --patch:     #e6c06a;
+      --del:       #f08a8a;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg:        #0d1117;
+    --surface:   #151b23;
+    --surface-2: #1d242e;
+    --fg:        #e6ebf2;
+    --fg-muted:  #a0abba;
+    --fg-faint:  #717d8c;
+    --line:      #2a323d;
+    --accent:    #4fd1c5;
+    --accent-ink:#06211f;
+    --code-bg:   #0a0f16;
+    --code-fg:   #dfe6ef;
+    --get:       #7eb3f5;
+    --post:      #68d391;
+    --patch:     #e6c06a;
+    --del:       #f08a8a;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--surface);
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 72px;
+  }
+
+  /* ---- masthead ---- */
+  header.masthead {
+    padding-block: 40px 28px;
+    border-bottom: 2px solid var(--fg);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(30px, 6vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--fg-muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--fg-muted);
+  }
+  .meta-strip b { color: var(--fg); font-weight: 600; }
+
+  /* ---- sticky nav ---- */
+  nav.toc {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 9;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px));
+  }
+  .toc-inner {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-block: 10px;
+    scrollbar-width: thin;
+  }
+  .toc a {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--fg-muted);
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  .toc a:hover { background: var(--surface-2); color: var(--fg); }
+
+  /* ---- sections ---- */
+  section { padding-block: 40px 0; }
+  h2 {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+  h3 {
+    font-size: 24px;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 26px 0 8px;
+  }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .muted { color: var(--fg-muted); }
+  a { color: var(--accent); }
+
+  code.inl {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    border: 1px solid var(--line);
+  }
+  pre code { font-family: var(--font-mono); }
+  .tok-key { color: #9ad4ff; }
+  .tok-str { color: #b9e6a0; }
+  .tok-num { color: #f0c987; }
+  .tok-com { color: #6b7a8d; font-style: italic; }
+
+  /* ---- tables ---- */
+  .t-scroll { overflow-x: auto; margin-bottom: 18px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    min-width: 440px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--fg-muted);
+  }
+  td.mono, th.mono { font-family: var(--font-mono); font-size: 12.5px; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ---- endpoint rows ---- */
+  .ep {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .ep-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .m {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+  }
+  .m-get   { color: var(--get); }
+  .m-post  { color: var(--post); }
+  .m-patch { color: var(--patch); }
+  .m-del   { color: var(--del); }
+  .path {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    word-break: break-all;
+    min-width: 0;
+  }
+  .pill {
+    font-size: 10.5px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--fg-faint);
+    border: 1px solid var(--line);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .pill-auth { color: var(--accent); border-color: var(--accent); }
+  .ep p { margin: 8px 0 0; font-size: 13.5px; color: var(--fg-muted); }
+
+  /* ---- callout ---- */
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin: 0 0 18px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  .note-t {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+
+  .warn { border-left-color: var(--patch); }
+  .warn .note-t { color: var(--patch); }
+
+  ul.tight { margin: 0 0 16px; padding-left: 20px; }
+  ul.tight li { margin-bottom: 7px; max-width: 66ch; }
+
+  .num { font-variant-numeric: tabular-nums; }
+
+  footer.end {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--fg-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Mobile API Reference · v1</p>
+    <h1>FMT Store App API</h1>
+    <p class="lede">Everything the mobile app needs to reproduce the fmtonlinestore.com storefront: branch selection, catalog, cart, checkout and account. Chat is not covered yet.</p>
+    <div class="meta-strip">
+      <span><b>Base URL</b> https://www.fmtonlinestore.com/api/v1</span>
+      <span><b>Auth</b> Laravel Sanctum (Bearer)</span>
+      <span><b>Currency</b> PKR (Rs)</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="toc-inner">
+      <a href="#start">Getting started</a>
+      <a href="#headers">Headers</a>
+      <a href="#shape">Responses</a>
+      <a href="#auth">Auth</a>
+      <a href="#stores">Stores</a>
+      <a href="#catalog">Catalog</a>
+      <a href="#cart">Cart</a>
+      <a href="#checkout">Checkout</a>
+      <a href="#orders">Orders</a>
+      <a href="#account">Account</a>
+      <a href="#content">Content</a>
+      <a href="#gotchas">Gotchas</a>
+    </div>
+  </nav>
+
+  <section id="start">
+    <h2>01 · Orientation</h2>
+    <h3>Getting started</h3>
+    <p>The API is stateless. Three pieces of context travel in headers instead of a session: who the user is, which branch they are shopping, and which cart belongs to them.</p>
+    <p>Call <code class="inl">GET /bootstrap</code> once at launch. It returns app config, both WhatsApp numbers, the branch list and a <code class="inl">default_store_id</code> to preselect.</p>
+<pre><code><span class="tok-com"># 1. Launch</span>
+curl https://www.fmtonlinestore.com/api/v1/bootstrap
+
+<span class="tok-com"># 2. Browse a branch's catalog</span>
+curl -H <span class="tok-str">"X-Store-Id: 26"</span> \
+     https://www.fmtonlinestore.com/api/v1/products?per_page=12
+
+<span class="tok-com"># 3. Add to cart as a guest — response returns a cart_token to keep</span>
+curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="tok-str">"Content-Type: application/json"</span> \
+     -d <span class="tok-str">'{"product_id":2275,"quantity":2}'</span> \
+     https://www.fmtonlinestore.com/api/v1/cart/items</code></pre>
+
+    <h4>Typical first-run flow</h4>
+    <ul class="tight">
+      <li><b>Bootstrap</b> → store the branch list, preselect <code class="inl">default_store_id</code>, cache both WhatsApp numbers.</li>
+      <li><b>Browse</b> → catalog endpoints work for guests. Stock always reflects the branch in <code class="inl">X-Store-Id</code>.</li>
+      <li><b>Cart</b> → guests get a <code class="inl">cart_token</code> on first add. Persist it in secure storage.</li>
+      <li><b>Login / register</b> → send the stored <code class="inl">X-Cart-Token</code> with the call and the guest cart is merged into the account automatically.</li>
+      <li><b>Checkout</b> → requires a Bearer token. Guest checkout is not allowed, same as the website.</li>
+    </ul>
+  </section>
+
+  <section id="headers">
+    <h2>02 · Request context</h2>
+    <h3>The three headers</h3>
+    <div class="t-scroll">
+      <table>
+        <thead>
+          <tr><th class="mono">Header</th><th>When</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">Authorization</td>
+            <td>Logged-in calls</td>
+            <td><code class="inl">Bearer &lt;token&gt;</code> from register or login. Required for checkout, orders and account.</td>
+          </tr>
+          <tr>
+            <td class="mono">X-Store-Id</td>
+            <td>Catalog &amp; cart</td>
+            <td>Selected branch id. Drives all stock and inventory checks. Omitted → falls back to the first active branch.</td>
+          </tr>
+          <tr>
+            <td class="mono">X-Cart-Token</td>
+            <td>Guest cart</td>
+            <td>UUID returned by any cart response. Not needed once the user is logged in, but harmless to keep sending.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <p class="note-t">Send both when logging in</p>
+      <p>If the user built a cart as a guest, include <code class="inl">X-Cart-Token</code> on the register/login call. The server merges those lines into the account cart and deletes the guest cart. Quantities are summed when the same item exists in both.</p>
+    </div>
+    <p class="muted">Every <code class="inl">/api/</code> response is JSON, whether or not you send <code class="inl">Accept: application/json</code>.</p>
+  </section>
+
+  <section id="shape">
+    <h2>03 · Contract</h2>
+    <h3>Response and error shapes</h3>
+    <h4>Success</h4>
+<pre><code>{
+  <span class="tok-key">"success"</span>: true,
+  <span class="tok-key">"message"</span>: <span class="tok-str">"Product added to cart."</span>,   <span class="tok-com">// may be null</span>
+  <span class="tok-key">"data"</span>: { <span class="tok-com">/* endpoint payload */</span> }
+}</code></pre>
+
+    <h4>Validation error — <span class="num">422</span></h4>
+    <p class="muted">Laravel's standard shape. Map <code class="inl">errors</code> straight onto form fields.</p>
+<pre><code>{
+  <span class="tok-key">"message"</span>: <span class="tok-str">"The email field must be a valid email address. (and 1 more error)"</span>,
+  <span class="tok-key">"errors"</span>: {
+    <span class="tok-key">"email"</span>:   [<span class="tok-str">"The email field must be a valid email address."</span>],
+    <span class="tok-key">"message"</span>: [<span class="tok-str">"The message field is required."</span>]
+  }
+}</code></pre>
+
+    <h4>Business rule rejected — <span class="num">422</span></h4>
+    <p class="muted">Stock and cart failures. <code class="inl">message</code> is written for display.</p>
+<pre><code>{
+  <span class="tok-key">"success"</span>: false,
+  <span class="tok-key">"message"</span>: <span class="tok-str">"Only 7 unit(s) available in stock."</span>,
+  <span class="tok-key">"errors"</span>: { <span class="tok-key">"cart"</span>: [<span class="tok-str">"Only 7 unit(s) available in stock."</span>] }
+}</code></pre>
+
+    <h4>Status codes</h4>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Code</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="mono num">200</td><td>OK</td></tr>
+          <tr><td class="mono num">201</td><td>Created — register, place order, contact</td></tr>
+          <tr><td class="mono num">401</td><td><code class="inl">{"message":"Unauthenticated."}</code> — token missing, expired or revoked. Send the user to login.</td></tr>
+          <tr><td class="mono num">404</td><td>Product, store, blog or order not found</td></tr>
+          <tr><td class="mono num">422</td><td>Validation or business rule</td></tr>
+          <tr><td class="mono num">429</td><td>Throttled — login 10/min, password reset and contact 5/min</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="auth">
+    <h2>04 · Endpoints</h2>
+    <h3>Auth</h3>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/auth/register</code><span class="pill">Public</span></div>
+      <p>Creates the account, saves the first address and returns a token. Mirrors the website's signup fields exactly.</p>
+    </article>
+    <p class="muted">Required: <code class="inl">name</code>, <code class="inl">email</code>, <code class="inl">whatsapp</code>, <code class="inl">alternate_number</code>, <code class="inl">city</code>, <code class="inl">district</code>, <code class="inl">password</code> (min 6, with <code class="inl">password_confirmation</code>). Optional <code class="inl">device_name</code> labels the token.</p>
+<pre><code>{
+  <span class="tok-key">"success"</span>: true,
+  <span class="tok-key">"message"</span>: <span class="tok-str">"Registered successfully."</span>,
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"token"</span>: <span class="tok-str">"12|bHE0RlrFYNT4xZuRtBTG..."</span>,
+    <span class="tok-key">"user"</span>: {
+      <span class="tok-key">"id"</span>: <span class="tok-num">523</span>,
+      <span class="tok-key">"name"</span>: <span class="tok-str">"Ayesha Khan"</span>,
+      <span class="tok-key">"email"</span>: <span class="tok-str">"ayesha@example.com"</span>,
+      <span class="tok-key">"contact"</span>: <span class="tok-str">"03001234567"</span>,
+      <span class="tok-key">"alternate_number"</span>: <span class="tok-str">"03011234567"</span>
+    }
+  }
+}</code></pre>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/auth/login</code><span class="pill">Public</span></div>
+      <p>Two modes. Default is email. Send <code class="inl">login_type: "whatsapp"</code> with a <code class="inl">whatsapp</code> field to log in by number instead — the same choice the website offers.</p>
+    </article>
+<pre><code><span class="tok-com">// by email</span>
+{ <span class="tok-key">"email"</span>: <span class="tok-str">"ayesha@example.com"</span>, <span class="tok-key">"password"</span>: <span class="tok-str">"••••••"</span> }
+
+<span class="tok-com">// by WhatsApp number</span>
+{ <span class="tok-key">"login_type"</span>: <span class="tok-str">"whatsapp"</span>, <span class="tok-key">"whatsapp"</span>: <span class="tok-str">"03001234567"</span>, <span class="tok-key">"password"</span>: <span class="tok-str">"••••••"</span> }</code></pre>
+    <p class="muted">Wrong credentials return <span class="num">422</span> keyed on <code class="inl">email</code> or <code class="inl">whatsapp</code> — not <span class="num">401</span>.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/auth/me</code><span class="pill pill-auth">Auth</span></div>
+      <p>Current user. Use it on resume to confirm the stored token is still valid.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/auth/logout</code><span class="pill pill-auth">Auth</span></div>
+      <p>Revokes only the token used for this call, so other devices stay signed in.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/auth/forgot-password</code><span class="pill">Public</span></div>
+      <p>Emails a reset link to <code class="inl">email</code>. An unknown address returns <span class="num">422</span>.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/auth/reset-password</code><span class="pill">Public</span></div>
+      <p>Completes the reset with <code class="inl">token</code>, <code class="inl">email</code>, <code class="inl">password</code>, <code class="inl">password_confirmation</code>. Capture the token from the emailed link via deep link, or let the user open the web page.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-del">DELETE</span><code class="path">/auth/account</code><span class="pill pill-auth">Auth</span></div>
+      <p>Permanent deletion, confirmed with the current <code class="inl">password</code>. Required by the Apple App Store because the app offers registration.</p>
+    </article>
+    <div class="note">
+      <p class="note-t">What deletion actually removes</p>
+      <p>The account, its saved address and its cart are deleted, and every token is revoked, so the user is signed out everywhere immediately. <b>Past orders are kept</b> as financial records — they simply stop being linked to a customer, and each order keeps its own billing name, phone and address. Word the confirmation screen accordingly rather than promising that order history disappears.</p>
+    </div>
+  </section>
+
+  <section id="stores">
+    <h3>Stores — branch selector</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/stores</code><span class="pill">Public</span></div>
+      <p>Active branches with their own address, two phone numbers and WhatsApp number.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/stores/{slug}</code><span class="pill">Public</span></div>
+      <p>One branch.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/stores/{slug}/products</code><span class="pill">Public</span></div>
+      <p>Only products actually in stock at that branch. Accepts <code class="inl">search</code>, <code class="inl">categories</code>, <code class="inl">sort</code>, <code class="inl">per_page</code>.</p>
+    </article>
+<pre><code>{
+  <span class="tok-key">"data"</span>: { <span class="tok-key">"stores"</span>: [
+    {
+      <span class="tok-key">"id"</span>: <span class="tok-num">26</span>,
+      <span class="tok-key">"name"</span>: <span class="tok-str">"FMT Online Store"</span>,
+      <span class="tok-key">"slug"</span>: <span class="tok-str">"online-delivery"</span>,
+      <span class="tok-key">"image"</span>: null,
+      <span class="tok-key">"address"</span>: <span class="tok-str">"FMT Online Store, Bhatti Bazar Mankera, District Bhakkar, Punjab"</span>,
+      <span class="tok-key">"phone_1"</span>: <span class="tok-str">"+923398040140"</span>,
+      <span class="tok-key">"phone_2"</span>: <span class="tok-str">"+923338040140"</span>,
+      <span class="tok-key">"whatsapp"</span>: <span class="tok-str">"+923398040140"</span>
+    },
+    {
+      <span class="tok-key">"id"</span>: <span class="tok-num">25</span>,
+      <span class="tok-key">"name"</span>: <span class="tok-str">"FMT Store Karachi (For Visits)"</span>,
+      <span class="tok-key">"slug"</span>: <span class="tok-str">"karachi-branch"</span>,
+      <span class="tok-key">"address"</span>: <span class="tok-str">"Shop # 38 First Floor United Center Sadar Karachi"</span>,
+      <span class="tok-key">"phone_1"</span>: <span class="tok-str">"+923138040140"</span>,
+      <span class="tok-key">"phone_2"</span>: null,
+      <span class="tok-key">"whatsapp"</span>: <span class="tok-str">"+923138040140"</span>
+    },
+    {
+      <span class="tok-key">"id"</span>: <span class="tok-num">27</span>,
+      <span class="tok-key">"name"</span>: <span class="tok-str">"FMT Store Lahore"</span>,
+      <span class="tok-key">"slug"</span>: <span class="tok-str">"lahore-branch"</span>,
+      <span class="tok-key">"address"</span>: null,     <span class="tok-com">// not configured yet</span>
+      <span class="tok-key">"phone_1"</span>: null,
+      <span class="tok-key">"phone_2"</span>: null,
+      <span class="tok-key">"whatsapp"</span>: null
+    }
+  ] }
+}</code></pre>
+    <p class="muted">Branch choice is client-side: store the id and send it as <code class="inl">X-Store-Id</code>. There is no "select store" call. Changing branch after items are in the cart empties the cart, because prices and stock are per branch.</p>
+    <div class="note warn">
+      <p class="note-t">Every branch field can be null</p>
+      <p><code class="inl">image</code>, <code class="inl">address</code>, <code class="inl">phone_1</code>, <code class="inl">phone_2</code> and <code class="inl">whatsapp</code> only appear once that branch has been filled in from the dashboard — the Lahore branch above has none yet. Hide the row rather than rendering "null".</p>
+    </div>
+  </section>
+
+  <section id="catalog">
+    <h3>Catalog</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/home</code><span class="pill">Public</span></div>
+      <p>Home screen blocks: <code class="inl">categories</code>, <code class="inl">latest_products</code>, <code class="inl">featured_products</code>, <code class="inl">special_products</code>. Featured and special fall back to latest when empty, so the screen is never blank.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/categories</code><span class="pill">Public</span></div>
+      <p>Parent categories each with their children and images.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/products</code><span class="pill">Public</span></div>
+      <p>Paginated listing, same filters as the website shop.</p>
+    </article>
+
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Param</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">categories</td><td>Comma-separated ids, e.g. <code class="inl">12,47</code>. Child categories are included automatically.</td></tr>
+          <tr><td class="mono">search</td><td>Matches title or SKU</td></tr>
+          <tr><td class="mono">sort</td><td><code class="inl">latest</code> (default), <code class="inl">price_low</code>, <code class="inl">price_high</code>, <code class="inl">name_asc</code>, <code class="inl">name_desc</code></td></tr>
+          <tr><td class="mono">stock</td><td><code class="inl">in_stock</code>, <code class="inl">out_of_stock</code> — relative to <code class="inl">X-Store-Id</code></td></tr>
+          <tr><td class="mono">per_page</td><td>Default 12, max 48</td></tr>
+          <tr><td class="mono">page</td><td>Page number</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+<pre><code>{
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"products"</span>: [{
+      <span class="tok-key">"id"</span>: <span class="tok-num">2275</span>,
+      <span class="tok-key">"title"</span>: <span class="tok-str">"D8 Display Light IC"</span>,
+      <span class="tok-key">"slug"</span>: <span class="tok-str">"d8-light-ic"</span>,
+      <span class="tok-key">"thumbnail"</span>: <span class="tok-str">"https://www.fmtonlinestore.com/storage/.../986474-card.jpg"</span>,
+      <span class="tok-key">"regular_price"</span>: <span class="tok-str">"5900.00"</span>,
+      <span class="tok-key">"sale_price"</span>: <span class="tok-str">"5250.00"</span>,
+      <span class="tok-key">"discount"</span>: <span class="tok-num">11</span>,            <span class="tok-com">// percent, or null</span>
+      <span class="tok-key">"stock_status"</span>: true,       <span class="tok-com">// in stock at this branch</span>
+      <span class="tok-key">"type"</span>: <span class="tok-str">"simple"</span>,          <span class="tok-com">// or "variable"</span>
+      <span class="tok-key">"category_name"</span>: <span class="tok-str">"JCID Products"</span>
+    }],
+    <span class="tok-key">"meta"</span>: { <span class="tok-key">"current_page"</span>: <span class="tok-num">1</span>, <span class="tok-key">"last_page"</span>: <span class="tok-num">757</span>, <span class="tok-key">"per_page"</span>: <span class="tok-num">3</span>,
+               <span class="tok-key">"total"</span>: <span class="tok-num">2270</span>, <span class="tok-key">"has_more"</span>: true }
+  }
+}</code></pre>
+    <p class="muted">Prices arrive as decimal strings. Parse before arithmetic.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/products/{slug}</code><span class="pill">Public</span></div>
+      <p>Full detail with gallery, variants and related products.</p>
+    </article>
+    <div class="note">
+      <p class="note-t">Variant stock</p>
+      <p>Each variant carries <code class="inl">stock_qty</code> and <code class="inl">in_stock</code>, and every attribute value carries <code class="inl">in_stock</code> — true when at least one variant holding that value has stock. Use it to disable sold-out options instead of letting the add-to-cart call fail. For a variable product, the product's <code class="inl">stock_qty</code> is the sum across variants.</p>
+    </div>
+<pre><code>{
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"product"</span>: {
+      <span class="tok-key">"id"</span>: <span class="tok-num">4635</span>,
+      <span class="tok-key">"title"</span>: <span class="tok-str">"Tempered Glass Pack"</span>,
+      <span class="tok-key">"type"</span>: <span class="tok-str">"variable"</span>,
+      <span class="tok-key">"stock_qty"</span>: <span class="tok-num">7</span>,
+      <span class="tok-key">"stock_status"</span>: true,
+      <span class="tok-key">"bulk_price"</span>: <span class="tok-num">800</span>,
+      <span class="tok-key">"min_bulk_qty"</span>: <span class="tok-num">5</span>,
+      <span class="tok-key">"gallery"</span>: [<span class="tok-str">"https://…/1.jpg"</span>, <span class="tok-str">"https://…/2.jpg"</span>],
+      <span class="tok-key">"variants"</span>: [
+        { <span class="tok-key">"id"</span>: <span class="tok-num">10</span>, <span class="tok-key">"sku"</span>: <span class="tok-str">"TG-S"</span>, <span class="tok-key">"regular_price"</span>: <span class="tok-str">"1000.00"</span>,
+          <span class="tok-key">"sale_price"</span>: <span class="tok-str">"900.00"</span>, <span class="tok-key">"bulk_price"</span>: <span class="tok-num">800</span>, <span class="tok-key">"min_bulk_qty"</span>: <span class="tok-num">5</span>,
+          <span class="tok-key">"stock_qty"</span>: <span class="tok-num">7</span>, <span class="tok-key">"in_stock"</span>: true,
+          <span class="tok-key">"attribute_values"</span>: [{ <span class="tok-key">"attribute_id"</span>: <span class="tok-num">1</span>,
+            <span class="tok-key">"attribute_name"</span>: <span class="tok-str">"Size"</span>, <span class="tok-key">"value_id"</span>: <span class="tok-num">3</span>, <span class="tok-key">"value"</span>: <span class="tok-str">"Small"</span> }] },
+        { <span class="tok-key">"id"</span>: <span class="tok-num">11</span>, <span class="tok-key">"sku"</span>: <span class="tok-str">"TG-L"</span>, <span class="tok-key">"stock_qty"</span>: <span class="tok-num">0</span>, <span class="tok-key">"in_stock"</span>: false, <span class="tok-com">/* … */</span> }
+      ],
+      <span class="tok-key">"attributes"</span>: [{
+        <span class="tok-key">"id"</span>: <span class="tok-num">1</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Size"</span>,
+        <span class="tok-key">"values"</span>: [
+          { <span class="tok-key">"id"</span>: <span class="tok-num">3</span>, <span class="tok-key">"value"</span>: <span class="tok-str">"Small"</span>, <span class="tok-key">"in_stock"</span>: true },
+          { <span class="tok-key">"id"</span>: <span class="tok-num">4</span>, <span class="tok-key">"value"</span>: <span class="tok-str">"Large"</span>, <span class="tok-key">"in_stock"</span>: false }
+        ]
+      }]
+    },
+    <span class="tok-key">"related_products"</span>: [ <span class="tok-com">/* up to 8 cards */</span> ]
+  }
+}</code></pre>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/search/products?q=</code><span class="pill">Public</span></div>
+      <p>Typeahead, max 10 cards. Returns an empty list below 2 characters.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/products/resolve/{id}</code><span class="pill">Public</span></div>
+      <p>Turns a <code class="inl">/p/{id}</code> short link into <code class="inl">{ id, slug }</code>. Use it for deep links shared from the website.</p>
+    </article>
+  </section>
+
+  <section id="cart">
+    <h3>Cart</h3>
+    <p>Works for guests and logged-in users. Carts are stored server-side, so they survive app reinstalls for logged-in users and persist by token for guests. Every cart response returns the full cart, so you never need a follow-up fetch.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/cart</code><span class="pill">Public</span></div>
+      <p>Current cart. With no <code class="inl">X-Cart-Token</code> and no Bearer token, a new empty cart and token are issued.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/cart/items</code><span class="pill">Public</span></div>
+      <p>Body: <code class="inl">product_id</code>, <code class="inl">quantity</code>, optional <code class="inl">variant_id</code> and <code class="inl">variant_label</code>. Adding an item already present increases its quantity.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-patch">PATCH</span><code class="path">/cart/items/{cart_key}</code><span class="pill">Public</span></div>
+      <p>Sets an absolute <code class="inl">quantity</code>. Use the <code class="inl">cart_key</code> from the cart response, not the product id.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-del">DELETE</span><code class="path">/cart/items/{cart_key}</code><span class="pill">Public</span></div>
+      <p>Removes one line.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-del">DELETE</span><code class="path">/cart</code><span class="pill">Public</span></div>
+      <p>Empties the cart.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/cart/merge</code><span class="pill pill-auth">Auth</span></div>
+      <p>Merges the guest cart named by <code class="inl">cart_token</code> into the account. Login and register already do this; this is the manual escape hatch.</p>
+    </article>
+
+<pre><code>{
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"cart_token"</span>: <span class="tok-str">"06d74083-50f4-4e3b-93a7-69f41e86163d"</span>,
+    <span class="tok-key">"store_id"</span>: <span class="tok-num">26</span>,
+    <span class="tok-key">"items"</span>: [{
+      <span class="tok-key">"cart_key"</span>: <span class="tok-str">"4635_v10"</span>,     <span class="tok-com">// "{product}" or "{product}_v{variant}"</span>
+      <span class="tok-key">"id"</span>: <span class="tok-num">4635</span>,
+      <span class="tok-key">"variant_id"</span>: <span class="tok-num">10</span>,
+      <span class="tok-key">"variant_label"</span>: <span class="tok-str">"Small"</span>,
+      <span class="tok-key">"title"</span>: <span class="tok-str">"Tempered Glass Pack"</span>,
+      <span class="tok-key">"image_url"</span>: <span class="tok-str">"https://…/thumb.jpg"</span>,
+      <span class="tok-key">"quantity"</span>: <span class="tok-num">5</span>,
+      <span class="tok-key">"unit_price"</span>: <span class="tok-num">900</span>,
+      <span class="tok-key">"bulk_price"</span>: <span class="tok-num">800</span>,
+      <span class="tok-key">"min_bulk_qty"</span>: <span class="tok-num">5</span>,
+      <span class="tok-key">"effective_price"</span>: <span class="tok-num">800</span>  <span class="tok-com">// what the customer pays</span>
+    }],
+    <span class="tok-key">"totals"</span>: { <span class="tok-key">"items_count"</span>: <span class="tok-num">1</span>, <span class="tok-key">"quantity"</span>: <span class="tok-num">5</span>,
+                <span class="tok-key">"subtotal"</span>: <span class="tok-num">4000</span>, <span class="tok-key">"total"</span>: <span class="tok-num">4000</span> }
+  }
+}</code></pre>
+
+    <div class="note">
+      <p class="note-t">Bulk pricing</p>
+      <p>Once a line's quantity reaches <code class="inl">min_bulk_qty</code>, <code class="inl">effective_price</code> switches from <code class="inl">unit_price</code> to <code class="inl">bulk_price</code>. In the example above, quantity 4 costs Rs 900 each; quantity 5 costs Rs 800 each. Always display <code class="inl">effective_price</code> and the server-provided <code class="inl">totals</code> rather than recomputing.</p>
+      <p>To watch it happen against live data, add product <code class="inl">4794</code> at branch 26: quantity 1 is Rs 900 each, quantity 10 drops to Rs 850 each for a Rs 8,500 subtotal.</p>
+    </div>
+    <div class="note warn">
+      <p class="note-t">Stock is enforced server-side</p>
+      <p>Adds and quantity increases are capped at the branch's inventory and rejected with <span class="num">422</span>. Treat the returned <code class="inl">message</code> as display copy.</p>
+    </div>
+  </section>
+
+  <section id="checkout">
+    <h3>Checkout</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/checkout/summary</code><span class="pill pill-auth">Auth</span></div>
+      <p>Recalculated cart, saved address for prefill, branch list, payment methods and the three notice lines shown on the website checkout. Returns <span class="num">422</span> when the cart is empty.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/orders</code><span class="pill pill-auth">Auth</span></div>
+      <p>Places the order: revalidates stock, creates the order, emails the customer and the store, then empties the cart.</p>
+    </article>
+
+    <p>Required body: <code class="inl">billing_name</code>, <code class="inl">billing_email</code>, <code class="inl">billing_phone</code>, <code class="inl">billing_address</code>, <code class="inl">billing_city</code>, <code class="inl">billing_province</code>, <code class="inl">billing_country</code>, <code class="inl">payment_method</code>. Optional: <code class="inl">billing_zip</code>, <code class="inl">order_notes</code>, <code class="inl">store_id</code>.</p>
+
+    <div class="note">
+      <p class="note-t">Payment follows the website</p>
+      <p>Cash on delivery, with a partial advance confirmed over WhatsApp. There is no payment gateway. After a successful order the customer must message the store to confirm — so the response hands you a ready-made deep link.</p>
+    </div>
+
+<pre><code>{
+  <span class="tok-key">"success"</span>: true,
+  <span class="tok-key">"message"</span>: <span class="tok-str">"Order placed successfully."</span>,
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"order"</span>: {
+      <span class="tok-key">"id"</span>: <span class="tok-num">475</span>,
+      <span class="tok-key">"status"</span>: <span class="tok-str">"pending"</span>,
+      <span class="tok-key">"payment_method"</span>: <span class="tok-str">"COD"</span>,
+      <span class="tok-key">"total"</span>: <span class="tok-num">1800</span>,
+      <span class="tok-key">"store"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">26</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Online Delivery"</span> },
+      <span class="tok-key">"items"</span>: [ <span class="tok-com">/* product_title, quantity, price, subtotal */</span> ]
+    },
+    <span class="tok-key">"whatsapp_url"</span>: <span class="tok-str">"https://wa.me/923338040140?text=Hi%2C%20I%20have%20just…"</span>
+  }
+}</code></pre>
+
+    <p>Open <code class="inl">whatsapp_url</code> directly. The message is prefilled with the order number, branch, every line item, the total, and the customer's own name, phone and address — the customer only presses send. Show a clear "Contact on WhatsApp to confirm" step after checkout, as the website does.</p>
+  </section>
+
+  <section id="orders">
+    <h3>Orders</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/orders</code><span class="pill pill-auth">Auth</span></div>
+      <p>The customer's orders across every branch, newest first. Paginated with <code class="inl">per_page</code> (default 10, max 50).</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/orders/{id}</code><span class="pill pill-auth">Auth</span></div>
+      <p>One order plus a fresh <code class="inl">whatsapp_url</code>, so the confirmation step can be retried later.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/orders/{id}/invoice</code><span class="pill pill-auth">Auth</span></div>
+      <p>Returns <code class="inl">invoice_url</code> — a signed, shareable link to the printable invoice. Open it in a browser or web view; it needs no auth header.</p>
+    </article>
+    <p class="muted">Orders belonging to another user return <span class="num">404</span>, never another customer's data.</p>
+  </section>
+
+  <section id="account">
+    <h3>Account</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/account/profile</code><span class="pill pill-auth">Auth</span></div>
+      <p>Name, email, contact and alternate number.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-patch">PUT</span><code class="path">/account/profile</code><span class="pill pill-auth">Auth</span></div>
+      <p>Updates the profile. To change the password send <code class="inl">current_password</code>, <code class="inl">password</code> and <code class="inl">password_confirmation</code> together; omit all three to leave it alone.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/account/addresses</code><span class="pill pill-auth">Auth</span></div>
+      <p>Returns <code class="inl">address</code>, or null if the customer has none yet.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-patch">PUT</span><code class="path">/account/addresses/billing</code><span class="pill pill-auth">Auth</span></div>
+      <p>Required: <code class="inl">name</code>, <code class="inl">address</code>, <code class="inl">city</code>, <code class="inl">zip</code>, <code class="inl">country</code>. Optional <code class="inl">phone</code>.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-patch">PUT</span><code class="path">/account/addresses/delivery</code><span class="pill pill-auth">Auth</span></div>
+      <p>Required: <code class="inl">delivery_address</code>.</p>
+    </article>
+    <div class="note warn">
+      <p class="note-t">One address per customer</p>
+      <p>The website stores a single address record per customer, and the app matches it. Each save overwrites the previous one — build a single editable address form, not a saved-address list.</p>
+    </div>
+  </section>
+
+  <section id="content">
+    <h3>App config &amp; content</h3>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/bootstrap</code><span class="pill">Public</span></div>
+      <p>Call at launch. Branch list, site details, social links, both WhatsApp numbers, currency and the version flags.</p>
+    </article>
+<pre><code>{
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"app"</span>: { <span class="tok-key">"min_version"</span>: <span class="tok-str">"1.0.0"</span>, <span class="tok-key">"latest_version"</span>: <span class="tok-str">"1.0.0"</span>,
+             <span class="tok-key">"maintenance"</span>: false, <span class="tok-key">"currency"</span>: <span class="tok-str">"PKR"</span>,
+             <span class="tok-key">"currency_symbol"</span>: <span class="tok-str">"Rs"</span> },
+    <span class="tok-key">"site"</span>: { <span class="tok-key">"name"</span>: <span class="tok-str">"FMT Online Store"</span>, <span class="tok-key">"logo"</span>: <span class="tok-str">"https://…/settings/….webp"</span>,
+              <span class="tok-key">"phone"</span>: <span class="tok-str">"03338040140"</span>, <span class="tok-key">"email"</span>: <span class="tok-str">"info@fmtonlinestore.com"</span>,
+              <span class="tok-key">"top_bar_text"</span>: <span class="tok-str">"Our Working Time 9:00AM To 9:00PM …"</span> },
+    <span class="tok-key">"whatsapp"</span>: {
+      <span class="tok-key">"general"</span>: <span class="tok-str">"+923398040140"</span>,   <span class="tok-com">// support / helpline buttons</span>
+      <span class="tok-key">"order"</span>:   <span class="tok-str">"+923398040140"</span>    <span class="tok-com">// order-confirmation button only</span>
+    },
+    <span class="tok-key">"social"</span>: { <span class="tok-key">"facebook"</span>: <span class="tok-str">"…"</span>, <span class="tok-key">"instagram"</span>: <span class="tok-str">"…"</span>, <span class="tok-com">/* … */</span> },
+    <span class="tok-key">"stores"</span>: [ <span class="tok-com">/* same shape as GET /stores */</span> ],
+    <span class="tok-key">"default_store_id"</span>: <span class="tok-num">26</span>
+  }
+}</code></pre>
+    <p class="muted"><code class="inl">default_store_id</code> is the <code class="inl">online-delivery</code> branch when it exists, otherwise the first active branch. Preselect it so the catalog works before the user picks a branch.</p>
+    <p class="muted">The two WhatsApp numbers are managed separately in the dashboard and may differ. Use <code class="inl">general</code> for support entry points and <code class="inl">order</code> only for order confirmation. They happen to be identical right now; do not collapse them in the app, because they are independent settings.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/pages/{slug}</code><span class="pill">Public</span></div>
+      <p>Policy text for <code class="inl">terms-of-use</code>, <code class="inl">privacy-policy</code> or <code class="inl">refund-policy</code>. Any other slug returns <span class="num">404</span>.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/blogs</code><span class="pill">Public</span></div>
+      <p>Published posts, newest first.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/blogs/{slug}</code><span class="pill">Public</span></div>
+      <p>One post with <code class="inl">long_description</code> plus up to four related posts.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/testimonials</code><span class="pill">Public</span></div>
+      <p>Approved testimonials with name, designation, star rating and content.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/contact</code><span class="pill">Public</span></div>
+      <p>Contact form. Required <code class="inl">name</code>, <code class="inl">email</code>, <code class="inl">message</code>; optional <code class="inl">phone</code>, <code class="inl">subject</code>. Stored and emailed to the store, tagged as coming from the app. Returns <span class="num">201</span>.</p>
+    </article>
+  </section>
+
+  <section id="gotchas">
+    <h2>05 · Before you build</h2>
+    <h3>Things that will bite otherwise</h3>
+    <ul class="tight">
+      <li><b>Stock is per branch.</b> The same product can be in stock at one branch and sold out at another. Always send <code class="inl">X-Store-Id</code>, and refresh the product screen after the user switches branch.</li>
+      <li><b>Switching branch empties the cart.</b> Warn the user before you change <code class="inl">X-Store-Id</code> while the cart has items.</li>
+      <li><b>Never compute totals on the device.</b> Bulk price thresholds apply per line. Use <code class="inl">effective_price</code> and <code class="inl">totals</code> from the response.</li>
+      <li><b>Prices are decimal strings</b> in catalog payloads (<code class="inl">"5250.00"</code>) and numbers in cart payloads. Normalise on parse.</li>
+      <li><b>Use <code class="inl">cart_key</code>, not <code class="inl">product_id</code></b>, for update and delete — a variable product has one line per variant.</li>
+      <li><b>Checkout needs a login.</b> There is no guest checkout, matching the website. Prompt for login when the cart is not empty rather than at app start.</li>
+      <li><b>Persist the <code class="inl">cart_token</code></b> in secure storage, and send it on login so a guest cart is not lost.</li>
+      <li><b>The order is not finished at checkout.</b> It is <code class="inl">pending</code> until the customer messages the store on WhatsApp and pays the advance. Make that step prominent.</li>
+      <li><b>Version flags are placeholders.</b> <code class="inl">min_version</code> and <code class="inl">latest_version</code> currently return <code class="inl">1.0.0</code> until they are configured server-side. Build the force-update check now; the values will become real.</li>
+    </ul>
+
+    <h4>Not available yet</h4>
+    <ul class="tight">
+      <li><b>Chat</b> — the website's live chat is deliberately out of scope for this phase.</li>
+      <li><b>Push notifications</b> — no device-registration endpoint yet; needs FCM credentials.</li>
+      <li><b>Variable products</b> — the shape is final and documented above, but the catalogue currently holds none, so every live product returns <code class="inl">"type": "simple"</code> with empty <code class="inl">variants</code> and <code class="inl">attributes</code>. Build the variant picker from this contract; you cannot exercise it against live data yet.</li>
+      <li><b>Blog posts</b> — <code class="inl">/blogs</code> returns an empty list until posts are published.</li>
+    </ul>
+  </section>
+
+  <footer class="end">
+    FMT Online Store · Mobile API v1 · all endpoints prefixed <code class="inl">/api/v1</code>
+  </footer>
+
+</div>
+
+</body></html>

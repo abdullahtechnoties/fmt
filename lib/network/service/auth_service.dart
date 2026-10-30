@@ -18,25 +18,10 @@ class AuthService extends GetxService {
   late final Future<void> ready;
   static final RxBool _logoutInProgress = false.obs;
 
-  // Role helpers
-  bool get isVendor =>
-      currentUser.value?.roles?.any(
-        (role) => role.name?.toLowerCase() == 'vendor',
-      ) ??
-      false;
-  bool get isCompany =>
-      currentUser.value?.roles?.any(
-        (role) => role.name?.toLowerCase() == 'company',
-      ) ??
-      false;
-  bool get isCustomer =>
-      currentUser.value?.roles?.any(
-        (role) => role.name?.toLowerCase() == 'customer',
-      ) ??
-      false;
-
-  // Check if user has allowed role for this app (single app, both roles)
-  bool get hasAllowedRole => isCustomer || isVendor;
+  /// FMT Store App has a single customer role — any authenticated user
+  /// may shop. Kept as getters so older call sites keep compiling.
+  bool get isCustomer => currentUser.value != null;
+  bool get hasAllowedRole => isCustomer;
 
   @override
   void onInit() async {
@@ -66,9 +51,7 @@ class AuthService extends GetxService {
         log('Decoded user data: $decoded');
         final user = UserModel.fromJson(Map<String, dynamic>.from(decoded));
         currentUser.value = user;
-        log(
-          'Restored user roles: ${user.roles?.map((role) => role.name).toList()}',
-        );
+        log('Restored user: ${user.displayName}');
       }
     } catch (_) {
       log('Failed to decode user data: $raw');
@@ -89,22 +72,13 @@ class AuthService extends GetxService {
     }
 
     final userJson = user.toJson();
-    final cachedRoles = currentUser.value?.roles;
-    if ((user.roles == null || user.roles!.isEmpty) && cachedRoles != null) {
-      userJson['roles'] = cachedRoles.map((role) => role.toJson()).toList();
-    }
 
     await LocalStorageService.prefs?.setString(
       AppStrings.userKey,
       jsonEncode(userJson),
     );
-    currentUser.value =
-        (user.roles == null || user.roles!.isEmpty) && cachedRoles != null
-        ? UserModel.fromJson(userJson)
-        : user;
-    log(
-      'Saved user roles: ${(userJson['roles'] as List?)?.map((role) => role['name']).toList()}',
-    );
+    currentUser.value = user;
+    log('Saved user: ${user.displayName}');
   }
 
   static bool firstTimeOnApp() {
@@ -208,8 +182,7 @@ class AuthService extends GetxService {
     }
   }
 
-  bool get requiresProfileCompletion =>
-      currentUser.value == null || !currentUser.value!.hasBasicDetails;
+  bool get requiresProfileCompletion => currentUser.value == null;
 
   static Future<void> forceLogout({bool showLogin = true}) async {
     if (_logoutInProgress.value) return;
