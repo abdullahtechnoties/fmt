@@ -1,5 +1,6 @@
 import 'package:fmt/models/order_model.dart';
 import 'package:fmt/repositories/order_repository.dart';
+import 'package:fmt/utilities/chat_navigator.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
 import 'package:fmt/utilities/translation_extention.dart';
 import 'package:get/get.dart';
@@ -51,11 +52,23 @@ class OrderDetailsController extends GetxController {
   }
 
   Future<void> openWhatsapp() async {
-    final url = (detail.value?.whatsappUrl ?? '').trim();
-    if (url.isEmpty) return;
+    final url = (detail.value?.whatsappUrl ?? '').trim();    if (url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  /// Opens the in-app store chat with this order's confirmation message
+  /// prefilled — mirrors the WhatsApp button for later follow-ups.
+  Future<void> confirmOnChat() {
+    final d = detail.value;
+    if (d == null) return Future.value();
+    final total =
+        d.summary.total > 0 ? d.summary.total : d.subtotal;
+    return ChatNavigator.confirmOrderOnChat(
+      orderId: d.summary.id,
+      total: total,
+    );
   }
 
   Future<void> openInvoice() async {

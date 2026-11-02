@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/repositories/auth_repository.dart';
+import 'package:fmt/services/notification_service.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
 import 'package:fmt/utilities/translation_extention.dart';
 import 'package:get/get.dart';
@@ -107,6 +108,9 @@ class SignupController extends GetxController {
         return;
       }
       await _repository.persistSession(res.data!);
+      try {
+        await FmtNotificationService.instance.refreshToken();
+      } catch (_) {}
       SnackbarService.showSuccess(
         title: 'auth.signup.successTitle'.trns(),
         message: 'auth.signup.successMessage'.trns(),

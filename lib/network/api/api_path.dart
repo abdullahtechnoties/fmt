@@ -50,6 +50,22 @@ class ApiPath {
   static const String accountBillingAddress = '/account/addresses/billing';
   static const String accountDeliveryAddress = '/account/addresses/delivery';
 
+  // Chat — one thread per customer, auth only.
+  static const String chat = '/chat';
+  static const String chatMessages = '/chat/messages';
+  static const String chatRead = '/chat/read';
+  static const String chatUnread = '/chat/unread';
+
+  // Push devices + notification settings (FCM, project fmt-app-5611f).
+  static const String devices = '/devices';
+  static const String notificationSettings = '/notifications/settings';
+
+  // Pusher private-channel authorizer. Per the API docs this lives
+  // outside /v1: `POST /api/broadcasting/auth` with the Bearer token
+  // (the website's /broadcasting/auth is cookie-only and rejects apps).
+  static const String broadcastingAuth =
+      'https://www.fmtonlinestore.com/api/broadcasting/auth';
+
   // Content
   static String page(String slug) => '/pages/$slug';
   static const String blogs = '/blogs';

@@ -1,179 +1,172 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:fmt/network/api/api_path.dart';
 import 'package:fmt/network/service/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
-/// A singleton service that manages a single Pusher connection
-/// to be shared by both ChatService and PusherSupportService
+/// Shared Pusher connection for the app (store chat, etc).
+///
+/// Replaces the legacy manager: no hard-coded secret (one was a key/secret
+/// mix-up), the app auth endpoint is `POST /api/broadcasting/auth` with
+/// the Bearer token (the website's `/broadcasting/auth` is cookie-only and
+/// rejects apps), and connect failures no longer throw — chat falls back
+/// to polling when realtime is unavailable.
+///
+/// The Pusher app key is a public client key. Ask the backend for
+/// `PUSHER_APP_KEY` and pass it to [init] before subscribing.
 class PusherManager extends GetxService {
   static PusherManager get instance => Get.find<PusherManager>();
-  
-  static const String _appKey = '0e338b1aa07568b911cb';
+
   static const String _cluster = 'ap2';
 
   final AuthService _auth = Get.find<AuthService>();
   PusherChannelsFlutter? _pusher;
-  final Completer<void> _connectionCompleter = Completer<void>();
   bool _isInitialized = false;
+  bool _isConnected = false;
+  String? _key = "2e5f57f8cc5c7acf6ab2";
 
-  // Map to track all active subscriptions: channelName -> eventHandlers
-  final Map<String, List<Function(dynamic)>> _channelEventHandlers = {};
+  final Map<String, List<Function(PusherEvent)>> _handlers = {};
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
-    await _initPusher();
-  }
+  bool get isReady => _isInitialized && _isConnected && _key != null;
 
-  Future<void> _initPusher() async {
-    if (_isInitialized) return;
-    
+  /// Initialises Pusher with the public app key. Safe to call repeatedly —
+  /// extra calls are no-ops. Never throws; returns false when realtime is
+  /// unavailable so callers can fall back to polling.
+  Future<bool> init({required String appKey}) async {
+    if (_isInitialized && _key == appKey) return _isConnected;
+    _key = appKey;
+    try {
+      _pusher?.disconnect();
+    } catch (_) {}
+    _handlers.clear();
+    _isInitialized = false;
+    _isConnected = false;
     try {
       _pusher = PusherChannelsFlutter.getInstance();
       await _pusher!.init(
-        apiKey: _appKey,
+        apiKey: appKey,
         cluster: _cluster,
-        onAuthorizer: _pusherAuthorizer,
-        onConnectionStateChange: (currentState, previousState) {
-          _log('Connection state: $previousState → $currentState');
-          if (currentState == 'CONNECTED') {
-            if (!_connectionCompleter.isCompleted) {
-              _connectionCompleter.complete();
-            }
-          }
+        onAuthorizer: _authorizer,
+        onConnectionStateChange: (current, _) {
+          _isConnected = current == 'CONNECTED';
+          _log('Connection state → $current');
         },
-        onError: (message, code, error) {
+        onError: (message, code, _) {
           _log('Pusher error [$code]: $message');
-          if (error != null) {
-            _log('Error details: $error');
-          }
         },
       );
       await _pusher!.connect();
       _isInitialized = true;
-      _log('Pusher initialized successfully');
-    } catch (e, stackTrace) {
-      _log('Pusher init error: $e\n$stackTrace');
-      if (!_connectionCompleter.isCompleted) {
-        _connectionCompleter.completeError(e);
-      }
+      return _isConnected;
+    } catch (e) {
+      _log('init failed: $e');
+      _isInitialized = true;
+      return false;
     }
   }
 
-  Future<void> ensureConnected() async {
-    if (!_isInitialized) {
-      await _initPusher();
-    }
-    if (!_connectionCompleter.isCompleted) {
-      await _connectionCompleter.future;
-    }
-  }
-
-  /// Subscribe to a channel and register an event handler
   Future<void> subscribe({
     required String channelName,
-    required Function(dynamic) onEvent,
+    required Function(PusherEvent) onEvent,
   }) async {
-    await ensureConnected();
-    
-    // If first subscription to this channel, subscribe in Pusher
-    if (!_channelEventHandlers.containsKey(channelName)) {
-      _channelEventHandlers[channelName] = [];
-      await _pusher!.subscribe(
-        channelName: channelName,
-        onEvent: _handlePusherEvent,
-      );
-      _log('Subscribed to channel: $channelName');
-    }
-    
-    // Add the event handler
-    _channelEventHandlers[channelName]!.add(onEvent);
-  }
-
-  /// Unsubscribe a specific event handler from a channel
-  Future<void> unsubscribe({
-    required String channelName,
-    Function(dynamic)? onEvent,
-  }) async {
-    if (!_channelEventHandlers.containsKey(channelName)) {
+    if (_key == null) {
+      _log('subscribe without key — call init() with PUSHER_APP_KEY first');
       return;
     }
-    
-    // If specific onEvent is provided, remove only that one
-    if (onEvent != null) {
-      _channelEventHandlers[channelName]!.remove(onEvent);
-    } else {
-      // Otherwise clear all handlers for this channel
-      _channelEventHandlers[channelName]!.clear();
+    if (!_isInitialized) {
+      await init(appKey: _key!);
     }
-    
-    // If no more handlers for this channel, unsubscribe from Pusher
-    if (_channelEventHandlers[channelName]!.isEmpty) {
-      await _pusher?.unsubscribe(channelName: channelName);
-      _channelEventHandlers.remove(channelName);
-      _log('Unsubscribed from channel: $channelName');
+    if (!isReady) {
+      _log('not connected — skipping subscribe to $channelName');
+      return;
+    }
+    if (!_handlers.containsKey(channelName)) {
+      _handlers[channelName] = [];
+      try {
+        await _pusher!.subscribe(
+          channelName: channelName,
+          onEvent: _dispatch,
+        );
+        _log('subscribed to $channelName');
+      } catch (e) {
+        _log('subscribe to $channelName failed: $e');
+        return;
+      }
+    }
+    _handlers[channelName]!.add(onEvent);
+  }
+
+  Future<void> unsubscribe({
+    required String channelName,
+    Function(PusherEvent)? onEvent,
+  }) async {
+    if (!_handlers.containsKey(channelName)) return;
+    if (onEvent != null) {
+      _handlers[channelName]!.remove(onEvent);
+    } else {
+      _handlers[channelName]!.clear();
+    }
+    if (_handlers[channelName]!.isEmpty) {
+      try {
+        await _pusher?.unsubscribe(channelName: channelName);
+      } catch (_) {}
+      _handlers.remove(channelName);
+      _log('unsubscribed from $channelName');
     }
   }
 
-  /// Handle incoming Pusher events and dispatch to all registered handlers
-  void _handlePusherEvent(dynamic event) {
+  void _dispatch(dynamic event) {
     if (event is! PusherEvent) return;
-    final channelName = event.channelName;
-    
-    if (_channelEventHandlers.containsKey(channelName)) {
-      for (final handler in _channelEventHandlers[channelName]!) {
-        try {
-          handler(event);
-        } catch (e) {
-          _log('Error in event handler: $e');
-        }
+    for (final handler in List.of(_handlers[event.channelName] ?? const [])) {
+      try {
+        handler(event);
+      } catch (e) {
+        _log('handler error: $e');
       }
     }
   }
 
-  /// Pusher channel authorization
-  dynamic _pusherAuthorizer(String channelName, String socketId, dynamic options) async {
+  /// `POST /api/broadcasting/auth` with Bearer token. The body is
+  /// form-encoded `socket_id` + `channel_name`; returns `{"auth": "…"}`.
+  /// Subscribing to another customer's conversation returns 403.
+  dynamic _authorizer(String channelName, String socketId, dynamic _) async {
     try {
       final token = _auth.accessToken.value ?? '';
-      final uri = Uri.parse('${ApiPath.baseUrl}/broadcasting/auth');
-
+      final uri = Uri.parse(ApiPath.broadcastingAuth);
       final client = HttpClient();
       final request = await client.postUrl(uri);
-
       request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
-      request.headers.set(HttpHeaders.contentTypeHeader, 'application/x-www-form-urlencoded');
+      request.headers.set(
+          HttpHeaders.contentTypeHeader, 'application/x-www-form-urlencoded');
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      request.write('socket_id=${Uri.encodeQueryComponent(socketId)}&channel_name=${Uri.encodeQueryComponent(channelName)}');
-
+      request.write(
+          'socket_id=${Uri.encodeQueryComponent(socketId)}&channel_name=${Uri.encodeQueryComponent(channelName)}');
       final response = await request.close();
       final body = await response.transform(utf8.decoder).join();
       client.close();
-
-      if (response.statusCode == 200) {
-        return jsonDecode(body);
-      }
-      _log('Auth [${response.statusCode}]: $body');
+      if (response.statusCode == 200) return jsonDecode(body);
+      _log('auth [${response.statusCode}]: $body');
       return null;
     } catch (e) {
-      _log('Auth error: $e');
+      _log('auth error: $e');
       return null;
     }
   }
 
   void _log(String message) {
-    if (kDebugMode) {
-      print('[PusherManager] $message');
-    }
+    if (kDebugMode) print('[PusherManager] $message');
   }
 
   @override
   void onClose() {
-    _pusher?.disconnect();
-    _channelEventHandlers.clear();
+    try {
+      _pusher?.disconnect();
+    } catch (_) {}
+    _handlers.clear();
     super.onClose();
   }
 }

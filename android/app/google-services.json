@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "343930587311",
+    "project_id": "fmt-app-5611f",
+    "storage_bucket": "fmt-app-5611f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343930587311:android:f8ac790c238a2b72ad2c5a",
+        "android_client_info": {
+          "package_name": "com.fmt.fmt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV6O8cuvgHqV5qapXfJa4BqSDdSZHwcg0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

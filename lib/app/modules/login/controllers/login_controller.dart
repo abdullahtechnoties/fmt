@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/network/service/local_storage.dart';
+import 'package:fmt/services/notification_service.dart';
 import 'package:fmt/repositories/auth_repository.dart';
 import 'package:fmt/utilities/app_strings.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
@@ -97,6 +98,11 @@ class LoginController extends GetxController {
         return;
       }
       await _repository.persistSession(res.data!);
+      // Register this handset for order + chat pushes (token is the
+      // server-side unique key, so re-registering updates in place).
+      try {
+        await FmtNotificationService.instance.refreshToken();
+      } catch (_) {}
       // A successful login ends guest mode.
       await LocalStorageService.prefs?.setBool(AppStrings.guestMode, false);
       SnackbarService.showSuccess(

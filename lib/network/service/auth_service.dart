@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fmt/models/user_model.dart';
 import 'package:fmt/network/service/local_storage.dart';
+import 'package:fmt/services/notification_service.dart';
 import 'package:fmt/utilities/app_strings.dart';
 import 'package:fmt/utilities/colors.dart';
 import 'package:fmt/utilities/snackbar_service.dart';
@@ -125,9 +126,12 @@ class AuthService extends GetxService {
   }
 
   static Future<void> logout() async {
-    // Clear FCM token first
-    // await NotificationService.instance.clearTokenOnLogout();
-    // await FirebaseMessaging.instance.deleteToken();
+    // Stop this handset receiving the previous customer's pushes.
+    try {
+      if (Get.isRegistered<FmtNotificationService>()) {
+        await FmtNotificationService.instance.clearOnLogout();
+      }
+    } catch (_) {}
     await LocalStorageService.prefs?.clear();
     await LocalStorageService.prefs?.setBool(AppStrings.firstTimeOnApp, false);
   }

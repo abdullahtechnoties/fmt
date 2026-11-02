@@ -354,11 +354,14 @@
       <a href="#auth">Auth</a>
       <a href="#stores">Stores</a>
       <a href="#catalog">Catalog</a>
+      <a href="#variants">Variants</a>
       <a href="#cart">Cart</a>
       <a href="#checkout">Checkout</a>
       <a href="#orders">Orders</a>
       <a href="#account">Account</a>
       <a href="#content">Content</a>
+      <a href="#chat">Chat</a>
+      <a href="#notifications">Push</a>
       <a href="#gotchas">Gotchas</a>
     </div>
   </nav>
@@ -605,6 +608,7 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
           <tr><td class="mono">search</td><td>Matches title or SKU</td></tr>
           <tr><td class="mono">sort</td><td><code class="inl">latest</code> (default), <code class="inl">price_low</code>, <code class="inl">price_high</code>, <code class="inl">name_asc</code>, <code class="inl">name_desc</code></td></tr>
           <tr><td class="mono">stock</td><td><code class="inl">in_stock</code>, <code class="inl">out_of_stock</code> — relative to <code class="inl">X-Store-Id</code></td></tr>
+          <tr><td class="mono">type</td><td><code class="inl">simple</code>, <code class="inl">variable</code>, or <code class="inl">all</code> (default)</td></tr>
           <tr><td class="mono">per_page</td><td>Default 12, max 48</td></tr>
           <tr><td class="mono">page</td><td>Page number</td></tr>
         </tbody>
@@ -620,6 +624,8 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <span class="tok-key">"thumbnail"</span>: <span class="tok-str">"https://www.fmtonlinestore.com/storage/.../986474-card.jpg"</span>,
       <span class="tok-key">"regular_price"</span>: <span class="tok-str">"5900.00"</span>,
       <span class="tok-key">"sale_price"</span>: <span class="tok-str">"5250.00"</span>,
+      <span class="tok-key">"price_from"</span>: <span class="tok-num">5250</span>,      <span class="tok-com">// cheapest sellable price</span>
+      <span class="tok-key">"price_to"</span>: <span class="tok-num">5250</span>,        <span class="tok-com">// equals price_from unless variable</span>
       <span class="tok-key">"discount"</span>: <span class="tok-num">11</span>,            <span class="tok-com">// percent, or null</span>
       <span class="tok-key">"stock_status"</span>: true,       <span class="tok-com">// in stock at this branch</span>
       <span class="tok-key">"type"</span>: <span class="tok-str">"simple"</span>,          <span class="tok-com">// or "variable"</span>
@@ -629,7 +635,11 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
                <span class="tok-key">"total"</span>: <span class="tok-num">2270</span>, <span class="tok-key">"has_more"</span>: true }
   }
 }</code></pre>
-    <p class="muted">Prices arrive as decimal strings. Parse before arithmetic.</p>
+    <p class="muted">Prices arrive as decimal strings. Parse before arithmetic. <code class="inl">price_from</code> and <code class="inl">price_to</code> are numbers.</p>
+    <div class="note">
+      <p class="note-t">How a variable product is priced in a listing</p>
+      <p>A variable product keeps its prices on its variants, so the card's <code class="inl">regular_price</code> and <code class="inl">sale_price</code> are taken from its cheapest active variant, and <code class="inl">price_from</code> / <code class="inl">price_to</code> give the spread for a "Rs 900 – Rs 1,500" label. <code class="inl">stock_status</code> is true when any one variant has stock at the branch. See <a href="#variants">Variable products</a>.</p>
+    </div>
 
     <article class="ep">
       <div class="ep-head"><span class="m m-get">GET</span><code class="path">/products/{slug}</code><span class="pill">Public</span></div>
@@ -645,9 +655,13 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <span class="tok-key">"id"</span>: <span class="tok-num">4635</span>,
       <span class="tok-key">"title"</span>: <span class="tok-str">"Tempered Glass Pack"</span>,
       <span class="tok-key">"type"</span>: <span class="tok-str">"variable"</span>,
-      <span class="tok-key">"stock_qty"</span>: <span class="tok-num">7</span>,
+      <span class="tok-key">"stock_qty"</span>: <span class="tok-num">7</span>,          <span class="tok-com">// summed across variants</span>
       <span class="tok-key">"stock_status"</span>: true,
-      <span class="tok-key">"bulk_price"</span>: <span class="tok-num">800</span>,
+      <span class="tok-key">"regular_price"</span>: <span class="tok-str">"1000.00"</span>, <span class="tok-com">// cheapest variant</span>
+      <span class="tok-key">"sale_price"</span>: <span class="tok-str">"900.00"</span>,
+      <span class="tok-key">"price_from"</span>: <span class="tok-num">900</span>,
+      <span class="tok-key">"price_to"</span>: <span class="tok-num">1500</span>,
+      <span class="tok-key">"bulk_price"</span>: <span class="tok-num">800</span>,       <span class="tok-com">// product-level; variants override</span>
       <span class="tok-key">"min_bulk_qty"</span>: <span class="tok-num">5</span>,
       <span class="tok-key">"gallery"</span>: [<span class="tok-str">"https://…/1.jpg"</span>, <span class="tok-str">"https://…/2.jpg"</span>],
       <span class="tok-key">"variants"</span>: [
@@ -678,6 +692,55 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <div class="ep-head"><span class="m m-get">GET</span><code class="path">/products/resolve/{id}</code><span class="pill">Public</span></div>
       <p>Turns a <code class="inl">/p/{id}</code> short link into <code class="inl">{ id, slug }</code>. Use it for deep links shared from the website.</p>
     </article>
+  </section>
+
+  <section id="variants">
+    <h3>Variable products</h3>
+    <p>A product is <code class="inl">"type": "variable"</code> when it sells in variants — size, colour, capacity. Everything that matters commercially (price, stock, SKU, bulk threshold) lives on the <b>variant</b>; the product row is a container for them.</p>
+
+    <h4>1 · In listings</h4>
+    <p>Price the card from <code class="inl">price_from</code> / <code class="inl">price_to</code> when they differ, and treat <code class="inl">stock_status</code> as "something is available" rather than a specific variant.</p>
+<pre><code>{ <span class="tok-key">"id"</span>: <span class="tok-num">4637</span>, <span class="tok-key">"type"</span>: <span class="tok-str">"variable"</span>,
+  <span class="tok-key">"regular_price"</span>: <span class="tok-str">"1200.00"</span>,  <span class="tok-com">// cheapest variant's regular</span>
+  <span class="tok-key">"sale_price"</span>: <span class="tok-str">"900.00"</span>,      <span class="tok-com">// cheapest variant's sale</span>
+  <span class="tok-key">"price_from"</span>: <span class="tok-num">900</span>, <span class="tok-key">"price_to"</span>: <span class="tok-num">1500</span>,
+  <span class="tok-key">"discount"</span>: <span class="tok-num">25</span>,
+  <span class="tok-key">"stock_status"</span>: true }         <span class="tok-com">// at least one variant has stock</span></code></pre>
+
+    <h4>2 · Render the picker</h4>
+    <p>Build one option group per entry in <code class="inl">attributes</code>. Each value carries <code class="inl">in_stock</code>, true when at least one variant holding that value has stock at the selected branch. Disable the others instead of letting the add-to-cart call fail.</p>
+
+    <h4>3 · Resolve the selection to a variant</h4>
+    <p>Match the chosen <code class="inl">value_id</code>s against <code class="inl">variants[].attribute_values[].value_id</code>. The variant whose value set equals the selection is the one being sold: show its price, and cap the quantity stepper at its <code class="inl">stock_qty</code>.</p>
+
+    <h4>4 · Add it to the cart</h4>
+<pre><code>POST /cart/items
+{ <span class="tok-key">"product_id"</span>: <span class="tok-num">4637</span>, <span class="tok-key">"variant_id"</span>: <span class="tok-num">12</span>, <span class="tok-key">"quantity"</span>: <span class="tok-num">10</span>,
+  <span class="tok-key">"variant_label"</span>: <span class="tok-str">"Small"</span> }
+
+<span class="tok-com">// the resulting cart line</span>
+{ <span class="tok-key">"cart_key"</span>: <span class="tok-str">"4637_v12"</span>, <span class="tok-key">"variant_id"</span>: <span class="tok-num">12</span>,
+  <span class="tok-key">"variant_label"</span>: <span class="tok-str">"Small"</span>, <span class="tok-key">"quantity"</span>: <span class="tok-num">10</span>,
+  <span class="tok-key">"unit_price"</span>: <span class="tok-num">900</span>, <span class="tok-key">"bulk_price"</span>: <span class="tok-num">850</span>,
+  <span class="tok-key">"min_bulk_qty"</span>: <span class="tok-num">10</span>, <span class="tok-key">"effective_price"</span>: <span class="tok-num">850</span> }</code></pre>
+    <p><code class="inl">variant_label</code> is the text you show the customer — join the selected values, e.g. "Small / Red". The server keeps it on the cart line and copies it onto the order, so the invoice and the WhatsApp confirmation message both read correctly. Send it; nothing reconstructs it for you.</p>
+
+    <div class="note">
+      <p class="note-t">One line per variant</p>
+      <p>A variant's <code class="inl">cart_key</code> is <code class="inl">{product_id}_v{variant_id}</code> — <code class="inl">4637_v12</code> above. The same product appears once per chosen variant, so always address lines by <code class="inl">cart_key</code> for PATCH and DELETE, never by <code class="inl">product_id</code>.</p>
+    </div>
+
+    <h4>5 · Pricing and stock follow the variant</h4>
+    <ul class="tight">
+      <li>Bulk pricing uses the <b>variant's</b> <code class="inl">bulk_price</code> and <code class="inl">min_bulk_qty</code>, falling back to the product's only where the variant leaves them unset. In the example above the price drops from Rs 900 to Rs 850 at quantity 10.</li>
+      <li>Stock is checked against that variant's inventory at <code class="inl">X-Store-Id</code>. Asking for more returns <span class="num">422</span> naming the figure available.</li>
+      <li>Adding a sold-out variant returns <span class="num">422</span> <span class="tok-str">"This product is out of stock."</span></li>
+    </ul>
+
+    <div class="note warn">
+      <p class="note-t">No variable products are live yet</p>
+      <p>This whole flow is implemented and tested, but every one of the 2,434 products in the catalogue today returns <code class="inl">"type": "simple"</code> with empty <code class="inl">variants</code> and <code class="inl">attributes</code>. Build the picker against this contract; it starts returning data as soon as variable products are published and <b>active</b>. Use <code class="inl">/products?type=variable</code> to check.</p>
+    </div>
   </section>
 
   <section id="cart">
@@ -770,7 +833,7 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <span class="tok-key">"payment_method"</span>: <span class="tok-str">"COD"</span>,
       <span class="tok-key">"total"</span>: <span class="tok-num">1800</span>,
       <span class="tok-key">"store"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">26</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Online Delivery"</span> },
-      <span class="tok-key">"items"</span>: [ <span class="tok-com">/* product_title, quantity, price, subtotal */</span> ]
+      <span class="tok-key">"items"</span>: [ <span class="tok-com">/* see the item shape under Orders */</span> ]
     },
     <span class="tok-key">"whatsapp_url"</span>: <span class="tok-str">"https://wa.me/923338040140?text=Hi%2C%20I%20have%20just…"</span>
   }
@@ -793,6 +856,22 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <div class="ep-head"><span class="m m-get">GET</span><code class="path">/orders/{id}/invoice</code><span class="pill pill-auth">Auth</span></div>
       <p>Returns <code class="inl">invoice_url</code> — a signed, shareable link to the printable invoice. Open it in a browser or web view; it needs no auth header.</p>
     </article>
+    <p>Every order line carries its product thumbnail and slug, so an order screen needs no extra catalog lookups:</p>
+<pre><code>{
+  <span class="tok-key">"items"</span>: [{
+    <span class="tok-key">"id"</span>: <span class="tok-num">91</span>,
+    <span class="tok-key">"product_id"</span>: <span class="tok-num">4637</span>,
+    <span class="tok-key">"variant_id"</span>: <span class="tok-num">12</span>,              <span class="tok-com">// null for a simple product</span>
+    <span class="tok-key">"variant_label"</span>: <span class="tok-str">"Small"</span>,       <span class="tok-com">// null for a simple product</span>
+    <span class="tok-key">"product_title"</span>: <span class="tok-str">"Tempered Glass Pack"</span>,
+    <span class="tok-key">"product_slug"</span>: <span class="tok-str">"tempered-glass-pack"</span>,
+    <span class="tok-key">"thumbnail"</span>: <span class="tok-str">"https://www.fmtonlinestore.com/storage/…/thumb.jpg"</span>,
+    <span class="tok-key">"price"</span>: <span class="tok-num">850</span>,                 <span class="tok-com">// charged per unit at the time of sale</span>
+    <span class="tok-key">"quantity"</span>: <span class="tok-num">10</span>,
+    <span class="tok-key">"subtotal"</span>: <span class="tok-num">8500</span>
+  }]
+}</code></pre>
+    <p class="muted"><code class="inl">product_title</code> is the name as it was when the order was placed, so it stays correct even if the product is renamed later. <code class="inl">thumbnail</code> and <code class="inl">product_slug</code> are null if the product has since been removed from the catalog — fall back to a placeholder and don't link it.</p>
     <p class="muted">Orders belonging to another user return <span class="num">404</span>, never another customer's data.</p>
   </section>
 
@@ -872,6 +951,143 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
     </article>
   </section>
 
+  <section id="chat">
+    <h3>Chat</h3>
+    <p><b>One thread per customer, login only.</b> The conversation is keyed to the account, so there is no thread list to build and no guest chat. Call <code class="inl">GET /chat</code> and you have the whole screen.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/chat</code><span class="pill pill-auth">Auth</span></div>
+      <p>Conversation plus the newest page of history (30 messages, oldest-first within the page). Pass <code class="inl">before_id</code> to page further back. The first call — without <code class="inl">before_id</code> — also marks the store's messages as read, exactly as the website does.</p>
+    </article>
+<pre><code>{
+  <span class="tok-key">"data"</span>: {
+    <span class="tok-key">"conversation"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">494</span>, <span class="tok-key">"user_id"</span>: <span class="tok-num">527</span>,
+                       <span class="tok-key">"unread_count"</span>: <span class="tok-num">0</span>, <span class="tok-key">"last_message_at"</span>: <span class="tok-str">"2026-10-30T23:10:12.000000Z"</span> },
+    <span class="tok-key">"messages"</span>: [{
+      <span class="tok-key">"id"</span>: <span class="tok-num">104</span>,
+      <span class="tok-key">"conversation_id"</span>: <span class="tok-num">494</span>,
+      <span class="tok-key">"user_id"</span>: <span class="tok-num">527</span>,
+      <span class="tok-key">"is_admin"</span>: false,          <span class="tok-com">// false = the customer, true = the store</span>
+      <span class="tok-key">"body"</span>: <span class="tok-str">"Is this item in stock?"</span>,
+      <span class="tok-key">"read_at"</span>: null,             <span class="tok-com">// set once the other side reads it</span>
+      <span class="tok-key">"created_at"</span>: <span class="tok-str">"2026-10-30T23:09:41.000000Z"</span>,
+      <span class="tok-key">"sender"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">527</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Ayesha Khan"</span> },
+      <span class="tok-key">"attachments"</span>: [{ <span class="tok-key">"id"</span>: <span class="tok-num">5149</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"part.png"</span>,
+                        <span class="tok-key">"url"</span>: <span class="tok-str">"https://…/storage/5149/part.png"</span>,
+                        <span class="tok-key">"size"</span>: <span class="tok-num">20481</span>, <span class="tok-key">"mime"</span>: <span class="tok-str">"image/png"</span> }],
+      <span class="tok-key">"voice_note"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">5150</span>, <span class="tok-key">"url"</span>: <span class="tok-str">"https://…/voice.wav"</span>,
+                      <span class="tok-key">"duration"</span>: <span class="tok-num">12.5</span>, <span class="tok-key">"mime"</span>: <span class="tok-str">"audio/x-wav"</span> }
+    }],
+    <span class="tok-key">"has_more"</span>: false,
+    <span class="tok-key">"channel"</span>: <span class="tok-str">"private-conversation.494"</span>   <span class="tok-com">// subscribe to this</span>
+  }
+}</code></pre>
+    <p class="muted"><code class="inl">attachments</code> is an empty array and <code class="inl">voice_note</code> is null on a plain text message.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/chat/messages</code><span class="pill pill-auth">Auth</span></div>
+      <p>Send as <code class="inl">multipart/form-data</code>. At least one of <code class="inl">body</code>, <code class="inl">attachments[]</code> or <code class="inl">voice_note</code> is required; an empty send returns <span class="num">422</span>. Returns <span class="num">201</span> with the created message in the shape above.</p>
+    </article>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Field</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">body</td><td>Optional text, max 5,000 chars</td></tr>
+          <tr><td class="mono">attachments[]</td><td>Up to 5 files, 10 MB each — jpg, jpeg, png, gif, webp, pdf, doc, docx, xls, xlsx, txt, csv, zip</td></tr>
+          <tr><td class="mono">voice_note</td><td>One file, 10 MB — webm, ogg, mp3, wav, mp4</td></tr>
+          <tr><td class="mono">voice_duration</td><td>Seconds, 0–300. Send it with a voice note so the player can show the length before loading the audio.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">The file type is checked by content, not by extension, so a mislabelled file is rejected with <span class="num">422</span>.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/chat/read</code><span class="pill pill-auth">Auth</span></div>
+      <p>Marks the store's messages read and clears the badge. Call it when the chat screen becomes visible.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/chat/unread</code><span class="pill pill-auth">Auth</span></div>
+      <p>Just <code class="inl">{ conversation_id, unread_count }</code>. Cheap — safe to call on app resume for the tab badge.</p>
+    </article>
+
+    <h4>Realtime — pick either, or both</h4>
+    <p>Both transports are supported. Polling is simpler and always correct; Pusher is instant. Using polling on the chat screen and push notifications for the background case is a perfectly good shipping position.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/chat/messages?after_id=</code><span class="pill pill-auth">Auth</span></div>
+      <p>Everything newer than <code class="inl">after_id</code>, oldest first, max 50. Send the newest id you hold (<code class="inl">0</code> on a cold start) and store the returned <code class="inl">last_id</code> for the next call. Idempotent — polling the same id twice returns nothing the second time.</p>
+    </article>
+<pre><code>GET /chat/messages?after_id=104
+
+{ <span class="tok-key">"data"</span>: { <span class="tok-key">"messages"</span>: [ <span class="tok-com">/* … */</span> ],
+           <span class="tok-key">"last_id"</span>: <span class="tok-num">105</span>,        <span class="tok-com">// pass this as the next after_id</span>
+           <span class="tok-key">"unread_count"</span>: <span class="tok-num">1</span> } }</code></pre>
+
+    <h4>Pusher</h4>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">key</td><td>Ask for <code class="inl">PUSHER_APP_KEY</code> — it is a public client key</td></tr>
+          <tr><td class="mono">cluster</td><td><code class="inl">ap2</code></td></tr>
+          <tr><td class="mono">channel</td><td><code class="inl">private-conversation.{id}</code> — returned as <code class="inl">channel</code> by <code class="inl">GET /chat</code></td></tr>
+          <tr><td class="mono">events</td><td><code class="inl">message.sent</code>, <code class="inl">messages.read</code></td></tr>
+          <tr><td class="mono">auth endpoint</td><td><code class="inl">POST /api/broadcasting/auth</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <p class="note-t">Use the app's own auth endpoint</p>
+      <p>Point your Pusher client at <code class="inl">/api/broadcasting/auth</code> and send the bearer token on it. The website's <code class="inl">/broadcasting/auth</code> accepts session cookies only and will reject the app. The endpoint receives Pusher's <code class="inl">socket_id</code> and <code class="inl">channel_name</code> and returns <code class="inl">{"auth": "…"}</code>; subscribing to another customer's conversation, or to the staff channel, returns <span class="num">403</span>.</p>
+    </div>
+    <p class="muted">The <code class="inl">message.sent</code> payload is the same message object as above. <code class="inl">messages.read</code> carries <code class="inl">{ conversation_id, user_id, read_by_admin, read_at }</code> — use it to flip your sent ticks. Neither event is delivered to the client that caused it, so keep showing your own sent message optimistically.</p>
+  </section>
+
+  <section id="notifications">
+    <h3>Push notifications</h3>
+    <p>Firebase Cloud Messaging, project <code class="inl">fmt-app-5611f</code>. Take <code class="inl">google-services.json</code> and <code class="inl">GoogleService-Info.plist</code> from that Firebase project — the server needs nothing from you but the device token.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/devices</code><span class="pill pill-auth">Auth</span></div>
+      <p>Register the FCM token. Body: <code class="inl">token</code>, <code class="inl">platform</code> (<code class="inl">android</code> | <code class="inl">ios</code> | <code class="inl">web</code>), optional <code class="inl">app_version</code>.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-del">DELETE</span><code class="path">/devices</code><span class="pill pill-auth">Auth</span></div>
+      <p>Body: <code class="inl">token</code>. Call it on logout so a shared handset stops receiving the previous customer's notifications.</p>
+    </article>
+    <div class="note">
+      <p class="note-t">When to call these</p>
+      <p>Register after <b>every</b> login and again whenever Firebase hands you a rotated token. The token is the unique key, so re-registering updates in place rather than creating duplicates, and a token that moves to a different account is reassigned. Tokens FCM reports as dead are deleted server-side automatically, so you never need to clean up.</p>
+    </div>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/notifications/settings</code><span class="pill pill-auth">Auth</span></div>
+      <p>Returns <code class="inl">notify_orders</code>, <code class="inl">notify_chat</code>, <code class="inl">push_enabled</code> (whether the server is configured to send at all) and <code class="inl">devices</code> (how many are registered).</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-patch">PUT</span><code class="path">/notifications/settings</code><span class="pill pill-auth">Auth</span></div>
+      <p>Send either or both toggles: <code class="inl">{"notify_chat": false}</code> is valid on its own. These mute our sending only — the OS-level permission is separate, so check both before telling a customer notifications are on.</p>
+    </article>
+
+    <h4>What arrives, and how to route it</h4>
+    <p>Every push carries a <code class="inl">data</code> block. Switch on <code class="inl">type</code> to decide which screen to open. All values are strings, as FCM requires.</p>
+<pre><code><span class="tok-com">// the store replied in chat</span>
+{ <span class="tok-key">"type"</span>: <span class="tok-str">"chat"</span>, <span class="tok-key">"conversation_id"</span>: <span class="tok-str">"494"</span>, <span class="tok-key">"message_id"</span>: <span class="tok-str">"105"</span> }
+
+<span class="tok-com">// an order changed status</span>
+{ <span class="tok-key">"type"</span>: <span class="tok-str">"order"</span>, <span class="tok-key">"order_id"</span>: <span class="tok-str">"480"</span>, <span class="tok-key">"status"</span>: <span class="tok-str">"dispatched"</span> }</code></pre>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Trigger</th><th>Title / body</th><th class="mono">Muted by</th></tr></thead>
+        <tbody>
+          <tr><td>Store replies in chat</td><td>“FMT Online Store” / the message text, or “Sent you a voice note” / “Sent you an attachment”</td><td class="mono">notify_chat</td></tr>
+          <tr><td>Order status changes</td><td>“Order #480 dispatched” / “Your order of Rs 1,750 has been dispatched.”</td><td class="mono">notify_orders</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Order statuses are <code class="inl">pending</code>, <code class="inl">confirmed</code>, <code class="inl">dispatched</code>, <code class="inl">completed</code> and <code class="inl">declined</code>. The customer gets the same news by email, so treat the push as a nudge rather than the only delivery. Nothing is pushed for an order placed at the counter or by a guest, because those have no account to notify.</p>
+  </section>
+
   <section id="gotchas">
     <h2>05 · Before you build</h2>
     <h3>Things that will bite otherwise</h3>
@@ -884,14 +1100,15 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <li><b>Checkout needs a login.</b> There is no guest checkout, matching the website. Prompt for login when the cart is not empty rather than at app start.</li>
       <li><b>Persist the <code class="inl">cart_token</code></b> in secure storage, and send it on login so a guest cart is not lost.</li>
       <li><b>The order is not finished at checkout.</b> It is <code class="inl">pending</code> until the customer messages the store on WhatsApp and pays the advance. Make that step prominent.</li>
+      <li><b>Chat is login-only.</b> There is one thread per account and no guest chat, so gate the chat entry point behind login rather than showing it and failing.</li>
+      <li><b>Don't trust a push to arrive.</b> Delivery is best-effort and the customer may have muted it or denied the OS permission. Refresh chat and orders when the app resumes instead of relying on notifications to drive state.</li>
       <li><b>Version flags are placeholders.</b> <code class="inl">min_version</code> and <code class="inl">latest_version</code> currently return <code class="inl">1.0.0</code> until they are configured server-side. Build the force-update check now; the values will become real.</li>
     </ul>
 
     <h4>Not available yet</h4>
     <ul class="tight">
-      <li><b>Chat</b> — the website's live chat is deliberately out of scope for this phase.</li>
-      <li><b>Push notifications</b> — no device-registration endpoint yet; needs FCM credentials.</li>
-      <li><b>Variable products</b> — the shape is final and documented above, but the catalogue currently holds none, so every live product returns <code class="inl">"type": "simple"</code> with empty <code class="inl">variants</code> and <code class="inl">attributes</code>. Build the variant picker from this contract; you cannot exercise it against live data yet.</li>
+      <li><b>iOS push</b> — Android is ready. iOS additionally needs an APNs key uploaded into the Firebase project; until that is done iOS devices register fine and simply never receive anything, with no error to detect. Confirm it is in place before testing on iPhone.</li>
+      <li><b>Live variable products</b> — the flow is built and tested (see <a href="#variants">Variable products</a>), but nothing in the catalogue is <code class="inl">variable</code> yet, so you cannot exercise the picker against live data until some are published and active.</li>
       <li><b>Blog posts</b> — <code class="inl">/blogs</code> returns an empty list until posts are published.</li>
     </ul>
   </section>

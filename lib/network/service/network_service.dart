@@ -167,10 +167,18 @@ class NetworkService extends GetxService {
     required String endpoint,
     Map<String, dynamic>? fields,
     Map<String, File>? files,
+    /// Same-key file lists (e.g. `attachments[]` for chat). Dio turns a
+    /// `List<MultipartFile>` value into repeated parts Laravel reads as an
+    /// array — a plain `Map<String, File>` cannot express that.
+    Map<String, List<File>>? multiFiles,
     void Function(int sent, int total)? onSendProgress,
   }) async {
     try {
-      final formData = await _buildFormData(fields: fields, files: files);
+      final formData = await _buildFormData(
+        fields: fields,
+        files: files,
+        multiFiles: multiFiles,
+      );
       final response = await _dio.post(
         endpoint,
         data: formData,
@@ -418,6 +426,7 @@ class NetworkService extends GetxService {
   Future<FormData> _buildFormData({
     Map<String, dynamic>? fields,
     Map<String, File>? files,
+    Map<String, List<File>>? multiFiles,
   }) async {
     final Map<String, dynamic> map = {};
 
@@ -442,6 +451,20 @@ class NetworkService extends GetxService {
           entry.value.path,
           filename: filename,
         );
+      }
+    }
+
+    // Same-key file lists → repeated parts (Laravel array input).
+    if (multiFiles != null) {
+      for (final entry in multiFiles.entries) {
+        final parts = <MultipartFile>[];
+        for (final file in entry.value) {
+          final filename = file.path.split('/').last;
+          parts.add(
+            await MultipartFile.fromFile(file.path, filename: filename),
+          );
+        }
+        map[entry.key] = parts;
       }
     }
 
@@ -545,7 +568,7 @@ class NetworkService extends GetxService {
                               ),
                               child: Center(
                                 child: Text(
-                                  'auth.login.login_btn'.trns(),
+                                  'auth.login.loginBtn'.trns(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,

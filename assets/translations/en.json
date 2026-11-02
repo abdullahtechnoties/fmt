@@ -107,9 +107,26 @@
     "save": "Save Password"
   },
   "chat":{
+    "store_title": "FMT Online Store",
     "active_now": "Active Now",
     "type_message": "Type a Message",
-    "just_now": "Just Now"
+    "just_now": "Just Now",
+    "load_failed": "Couldn't load your chat. Please try again.",
+    "send_failed": "Couldn't send your message. Tap it to retry.",
+    "media_failed": "Couldn't attach that file. Please try another.",
+    "mic_permission": "Microphone permission is needed to record a voice note.",
+    "record_failed": "Couldn't record that voice note. Please try again.",
+    "play_failed": "Couldn't play that voice note.",
+    "empty_title": "Chat with the store",
+    "empty_message": "Ask about products, orders or delivery - the team replies here.",
+    "take_photo": "Take a photo",
+    "choose_photo": "Choose from gallery",
+    "choose_file": "Choose a file",
+    "file": "File",
+    "recording": "Recording…",
+    "recording_hint": "Tap send to share your voice note",
+    "confirm_on_chat": "Confirm on Chat",
+    "confirm_prefill": "Assalam-o-Alaikum! I want to confirm my order #:id (:currency:total). I understand a partial advance payment is required and will share the payment details here."
   },
   "drawer":{
     "home": "Home",
@@ -237,6 +254,7 @@
     "required_login": "Login",
     "required_checkout": "Please log in to proceed to checkout.",
     "required_profile": "Log in to view your profile, orders and saved details.",
+    "required_chat": "Log in to chat with the store about your orders.",
     "forgot_password_title": "Forgot Password?",
     "email_hint": "Enter your email address",
     "reset_password_desc": "* We will send you a message to set or reset your new password",
@@ -549,6 +567,7 @@
     "sessionExpired": {
       "title": "Session Expired",
       "message": "Your session has expired. Please login again to continue."
+      
     },
     "connectionTimeout": "Connection timed out. Please try again.",
     "noInternet": "No internet connection. Please check your network.",

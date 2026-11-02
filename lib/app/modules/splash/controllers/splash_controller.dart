@@ -4,6 +4,8 @@ import 'package:fmt/network/service/auth_service.dart';
 import 'package:fmt/network/service/local_storage.dart';
 import 'package:fmt/repositories/auth_repository.dart';
 import 'package:fmt/repositories/store_repository.dart';
+import 'package:fmt/services/notification_resolver_service.dart';
+import 'package:fmt/services/notification_service.dart';
 import 'package:fmt/services/store_service.dart';
 import 'package:fmt/utilities/app_strings.dart';
 import 'package:get/get.dart';
@@ -48,7 +50,11 @@ class SplashController extends GetxController {
       // profile tab and checkout prompt for login when needed.
       final guest =
           LocalStorageService.prefs?.getBool(AppStrings.guestMode) ?? false;
-      Get.offAllNamed(guest ? Routes.BOTTOMNAV : Routes.LOGIN);
+      if (guest) {
+        _enterBottomNav();
+      } else {
+        Get.offAllNamed(Routes.LOGIN);
+      }
       return;
     }
 
@@ -63,7 +69,19 @@ class SplashController extends GetxController {
       return;
     }
     await Get.find<AuthService>().setCurrentUser(me.data);
+    _enterBottomNav();
+  }
+
+  /// Enters the shop, then resolves a terminated-state notification tap
+  /// (chat/order) once the first frame is up.
+  void _enterBottomNav() {
     Get.offAllNamed(Routes.BOTTOMNAV);
+    Future.delayed(const Duration(milliseconds: 600), () {
+      try {
+        final tap = FmtNotificationService.instance.consumePendingTap();
+        NotificationResolverService.instance.handlePendingLaunch(tap);
+      } catch (_) {}
+    });
   }
 
   Future<void> _bootstrap() async {

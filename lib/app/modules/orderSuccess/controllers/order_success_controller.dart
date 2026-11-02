@@ -1,4 +1,5 @@
 import 'package:fmt/app/routes/app_pages.dart';
+import 'package:fmt/utilities/chat_navigator.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -40,12 +41,20 @@ class OrderSuccessController extends GetxController {
   bool get hasWhatsapp =>
       (whatsappUrl.value ?? '').trim().isNotEmpty;
 
-  Future<void> openWhatsapp() async {
-    final url = (whatsappUrl.value ?? '').trim();
+  Future<void> openWhatsapp() async {    final url = (whatsappUrl.value ?? '').trim();
     if (url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  /// Opens the in-app store chat with the order-confirmation message
+  /// prefilled — the WhatsApp button stays as the parallel option.
+  Future<void> confirmOnChat() {
+    return ChatNavigator.confirmOrderOnChat(
+      orderId: orderId.value,
+      total: total.value,
+    );
   }
 
   void onContinueShopping() {

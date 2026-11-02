@@ -11,7 +11,7 @@ import 'package:fmt/app/modules/menuDrawer/controllers/menu_drawer_controller.da
 import 'package:fmt/app/modules/menuDrawer/views/menu_drawer_view.dart';
 import 'package:fmt/app/modules/profile/controllers/profile_controller.dart';
 import 'package:fmt/app/modules/profile/views/profile_view.dart';
-import 'package:fmt/app/routes/app_pages.dart';
+import 'package:fmt/utilities/chat_navigator.dart';
 import 'package:fmt/utilities/colors.dart';
 import 'package:get/get.dart';
 
@@ -120,19 +120,55 @@ class BottomnavView extends GetView<BottomnavController> {
         body: Obx(
           () => IndexedStack(index: controller.tabIndex.value, children: pages),
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
-          elevation: 4,
-          shape: const CircleBorder(),
-          onPressed: () => Get.toNamed(Routes.SUPPORT),
-          child: Image.asset(
-            'assets/images/chat.png',
-            height: 33,
-            width: 33,
-            fit: BoxFit.contain,
-          ),
-        ),
+        floatingActionButton: Obx(() {
+          final unread = controller.chatUnread.value;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              FloatingActionButton(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                elevation: 4,
+                shape: const CircleBorder(),
+                onPressed: () => ChatNavigator.openChat(),
+                child: Image.asset(
+                  'assets/images/chat.png',
+                  height: 33,
+                  width: 33,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              if (unread > 0)
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 22,
+                      minHeight: 22,
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(11),
+                      border: Border.all(
+                          color: AppColors.white, width: 1.5),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      unread > 99 ? '99+' : '$unread',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: _buildBottomBar(),
       ),

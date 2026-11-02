@@ -1,3 +1,4 @@
+import 'package:fmt/app/modules/bottomnav/controllers/bottomnav_controller.dart';
 import 'package:fmt/app/modules/products/controllers/products_controller.dart';
 import 'package:fmt/models/catalog_model.dart';
 import 'package:fmt/network/service/auth_service.dart';
@@ -142,7 +143,7 @@ class HomeController extends GetxController {
 
   /// All three "view all" entry points land on the shared products page.
   void openAllCategories() =>
-      ProductsController.open(title: 'home.categories'.trns());
+     Get.find<BottomnavController>().changeTabIndex(1);
 
   void openAllProducts() =>
       ProductsController.open(title: 'products.all_products'.trns());

@@ -74,6 +74,18 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                           ),
                         if (detail.hasWhatsapp)
                           SizedBox(height: R.h(12)),
+                        // In-app confirmation lives beside WhatsApp so a
+                        // pending order can be confirmed from its history.
+                        SizedBox(
+                          height: R.h(50),
+                          child: MainBtn(
+                            text: 'chat.confirm_on_chat'.trns(),
+                            color: AppColors.primary,
+                            borderRadius: 12,
+                            onPressed: controller.confirmOnChat,
+                          ),
+                        ),
+                        SizedBox(height: R.h(12)),
                         Obx(() => SizedBox(
                               height: R.h(50),
                               child: MainBtn(

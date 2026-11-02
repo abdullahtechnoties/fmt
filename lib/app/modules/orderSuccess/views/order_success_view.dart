@@ -156,6 +156,18 @@ class OrderSuccessView extends GetView<OrderSuccessController> {
                     : const SizedBox.shrink()),
                 SizedBox(height: R.h(12)),
 
+                // Secondary: confirm in app chat (prefilled message)
+                SizedBox(
+                  height: R.h(50),
+                  child: MainBtn(
+                    text: 'chat.confirm_on_chat'.trns(),
+                    color: AppColors.primary,
+                    borderRadius: 12,
+                    onPressed: controller.confirmOnChat,
+                  ),
+                ),
+                SizedBox(height: R.h(12)),
+
                 // Secondary: back to shopping (clears the stack)
                 SizedBox(
                   height: R.h(50),
