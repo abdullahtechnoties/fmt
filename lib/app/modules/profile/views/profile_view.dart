@@ -138,6 +138,14 @@ class ProfileView extends GetView<ProfileController> {
                               Get.toNamed(Routes.PRIVACY_POLICY);
                             }),
                         ProfileMenuItem(
+                            icon: Icons.confirmation_number_outlined,
+                            title:
+                                'support.my_tickets'.trns(),
+                            onTap: () {
+                              Get.toNamed(
+                                  Routes.TICKETS);
+                            }),
+                        ProfileMenuItem(
                             icon: Icons.help_outline,
                             title: 'profile.faqs'.trns(),
                             onTap: () {

@@ -48,6 +48,10 @@ import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/support/bindings/support_binding.dart';
 import '../modules/support/views/support_view.dart';
+import '../modules/ticketDetails/bindings/ticket_details_binding.dart';
+import '../modules/ticketDetails/views/ticket_details_view.dart';
+import '../modules/ticketList/bindings/ticket_list_binding.dart';
+import '../modules/ticketList/views/ticket_list_view.dart';
 
 part 'app_routes.dart';
 
@@ -131,6 +135,16 @@ class AppPages {
       name: _Paths.SUPPORT,
       page: () => const SupportView(),
       binding: SupportBinding(),
+    ),
+    GetPage(
+      name: _Paths.TICKETS,
+      page: () => const TicketListView(),
+      binding: TicketListBinding(),
+    ),
+    GetPage(
+      name: _Paths.TICKET_DETAILS,
+      page: () => const TicketDetailsView(),
+      binding: TicketDetailsBinding(),
     ),
     GetPage(
       name: _Paths.EDIT_PROFILE,

@@ -362,6 +362,7 @@
       <a href="#content">Content</a>
       <a href="#chat">Chat</a>
       <a href="#notifications">Push</a>
+      <a href="#support">Support</a>
       <a href="#gotchas">Gotchas</a>
     </div>
   </nav>
@@ -1088,6 +1089,112 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
     <p class="muted">Order statuses are <code class="inl">pending</code>, <code class="inl">confirmed</code>, <code class="inl">dispatched</code>, <code class="inl">completed</code> and <code class="inl">declined</code>. The customer gets the same news by email, so treat the push as a nudge rather than the only delivery. Nothing is pushed for an order placed at the counter or by a guest, because those have no account to notify.</p>
   </section>
 
+  <section id="support">
+    <h3>Support tickets</h3>
+    <p><b>Login only.</b> A ticket belongs to an account — that is what makes tracking possible — so gate the entry point behind login rather than showing a form that will fail. Each ticket carries a human reference like <code class="inl">TKT-000123</code>, which is what every endpoint below addresses it by.</p>
+    <p class="muted">This is separate from <code class="inl">POST /contact</code>. Contact is a one-way enquiry with no tracking; a ticket is a tracked conversation with a status. Offer both, or only tickets — but don't send problem reports to <code class="inl">/contact</code>, because nothing can be followed up there.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/support/categories</code><span class="pill pill-auth">Auth</span></div>
+      <p>Active categories for the form's dropdown, in display order. Staff manage these from the dashboard, so fetch rather than hardcode.</p>
+    </article>
+<pre><code>{ <span class="tok-key">"data"</span>: { <span class="tok-key">"categories"</span>: [
+  { <span class="tok-key">"id"</span>: <span class="tok-num">1</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Order Issue"</span>, <span class="tok-key">"slug"</span>: <span class="tok-str">"order-issue"</span> },
+  { <span class="tok-key">"id"</span>: <span class="tok-num">2</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Payment Issue"</span>, <span class="tok-key">"slug"</span>: <span class="tok-str">"payment-issue"</span> }
+] } }</code></pre>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/support/tickets</code><span class="pill pill-auth">Auth</span></div>
+      <p>Raise a ticket. Returns <span class="num">201</span> with the ticket, including its new reference.</p>
+    </article>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Field</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">ticket_category_id</td><td>Required, must be an <b>active</b> category id</td></tr>
+          <tr><td class="mono">name</td><td>Required, max 255 — prefill from the account</td></tr>
+          <tr><td class="mono">email</td><td>Required, valid email, max 255 — prefill from the account</td></tr>
+          <tr><td class="mono">subject</td><td>Required, max 255</td></tr>
+          <tr><td class="mono">message</td><td>Required, max 5,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Name and email are stored <em>on the ticket</em>, not just read from the account, so the record still reads correctly later. There are no attachments on tickets.</p>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/support/tickets</code><span class="pill pill-auth">Auth</span></div>
+      <p>The customer's own tickets, most recent activity first, paginated (<code class="inl">per_page</code> default 15, max 50). Rows omit the thread — fetch one ticket for that.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/support/tickets/{reference}</code><span class="pill pill-auth">Auth</span></div>
+      <p>One ticket with its full thread. Opening it clears that ticket's unread badge.</p>
+    </article>
+<pre><code>{
+  <span class="tok-key">"data"</span>: { <span class="tok-key">"ticket"</span>: {
+    <span class="tok-key">"reference"</span>: <span class="tok-str">"TKT-000123"</span>,
+    <span class="tok-key">"subject"</span>: <span class="tok-str">"Order 123 arrived damaged"</span>,
+    <span class="tok-key">"message"</span>: <span class="tok-str">"The screen protector was cracked on arrival."</span>,
+    <span class="tok-key">"status"</span>: <span class="tok-str">"in_progress"</span>,
+    <span class="tok-key">"status_label"</span>: <span class="tok-str">"In Progress"</span>,   <span class="tok-com">// ready to display</span>
+    <span class="tok-key">"category"</span>: <span class="tok-str">"Order Issue"</span>,       <span class="tok-com">// null if the category was removed</span>
+    <span class="tok-key">"unread_count"</span>: <span class="tok-num">0</span>,
+    <span class="tok-key">"last_reply_at"</span>: <span class="tok-str">"2026-11-05T12:40:02.000000Z"</span>,
+    <span class="tok-key">"created_at"</span>: <span class="tok-str">"2026-11-05T11:02:55.000000Z"</span>,
+    <span class="tok-key">"replies"</span>: [{
+      <span class="tok-key">"id"</span>: <span class="tok-num">14</span>,
+      <span class="tok-key">"is_staff"</span>: true,              <span class="tok-com">// true = the store, false = the customer</span>
+      <span class="tok-key">"author"</span>: <span class="tok-str">"Support"</span>,
+      <span class="tok-key">"body"</span>: <span class="tok-str">"Sorry about that — a replacement ships today."</span>,
+      <span class="tok-key">"created_at"</span>: <span class="tok-str">"2026-11-05T12:40:02.000000Z"</span>
+    }]
+  } }
+}</code></pre>
+    <div class="note">
+      <p class="note-t">Staff keep private notes you never see</p>
+      <p>Dashboard users can attach internal notes to a ticket. Those are filtered out of <code class="inl">replies</code> entirely and never raise the unread count, so the thread you render is exactly what the customer is meant to read. The ticket's internal priority is not exposed either.</p>
+    </div>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/support/tickets/{reference}/replies</code><span class="pill pill-auth">Auth</span></div>
+      <p>Body: <code class="inl">body</code> (required, max 5,000). Returns <span class="num">201</span> with the updated ticket and thread.</p>
+    </article>
+    <div class="note warn">
+      <p class="note-t">Replying reopens a finished ticket</p>
+      <p>If the customer replies to a ticket that is <code class="inl">resolved</code>, <code class="inl">rejected</code> or <code class="inl">closed</code>, it goes back to <code class="inl">open</code> automatically — so re-read <code class="inl">status</code> from the response instead of assuming it is unchanged. Say so in the UI ("replying will reopen this request") so it isn't a surprise.</p>
+    </div>
+
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/support/tickets/{reference}/read</code><span class="pill pill-auth">Auth</span></div>
+      <p>Clears one ticket's unread badge without fetching the thread.</p>
+    </article>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/support/unread</code><span class="pill pill-auth">Auth</span></div>
+      <p>Returns <code class="inl">{ unread_count, open_tickets }</code> across every ticket — cheap enough to call on app resume for a tab badge.</p>
+    </article>
+
+    <h4>Statuses</h4>
+    <div class="t-scroll">
+      <table>
+        <thead><tr><th class="mono">Value</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">open</td><td>Waiting on the store</td></tr>
+          <tr><td class="mono">in_progress</td><td>Being worked on</td></tr>
+          <tr><td class="mono">resolved</td><td>Fixed</td></tr>
+          <tr><td class="mono">rejected</td><td>Not actionable</td></tr>
+          <tr><td class="mono">closed</td><td>Finished</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Always render <code class="inl">status_label</code> rather than formatting <code class="inl">status</code> yourself. A ticket only reaches these states when staff move it — the customer cannot set a status.</p>
+
+    <h4>What the customer is told</h4>
+    <ul class="tight">
+      <li><b>On submit</b> — a confirmation email carrying the reference.</li>
+      <li><b>On a staff reply or status change</b> — an email, plus a push with <code class="inl">{ "type": "ticket", "reference": "TKT-000123", "ticket_id": "123" }</code>. Route on <code class="inl">type</code> and open the ticket by its reference.</li>
+      <li>Muted by the <code class="inl">notify_support</code> toggle, which sits alongside <code class="inl">notify_orders</code> and <code class="inl">notify_chat</code> in <a href="#notifications">notification settings</a>.</li>
+    </ul>
+  </section>
+
   <section id="gotchas">
     <h2>05 · Before you build</h2>
     <h3>Things that will bite otherwise</h3>
@@ -1101,6 +1208,7 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <li><b>Persist the <code class="inl">cart_token</code></b> in secure storage, and send it on login so a guest cart is not lost.</li>
       <li><b>The order is not finished at checkout.</b> It is <code class="inl">pending</code> until the customer messages the store on WhatsApp and pays the advance. Make that step prominent.</li>
       <li><b>Chat is login-only.</b> There is one thread per account and no guest chat, so gate the chat entry point behind login rather than showing it and failing.</li>
+      <li><b>Support tickets are login-only too</b>, and are addressed by <code class="inl">reference</code> rather than a numeric id. A customer replying to a finished ticket reopens it, so re-read the status from the response.</li>
       <li><b>Don't trust a push to arrive.</b> Delivery is best-effort and the customer may have muted it or denied the OS permission. Refresh chat and orders when the app resumes instead of relying on notifications to drive state.</li>
       <li><b>Version flags are placeholders.</b> <code class="inl">min_version</code> and <code class="inl">latest_version</code> currently return <code class="inl">1.0.0</code> until they are configured server-side. Build the force-update check now; the values will become real.</li>
     </ul>
@@ -1109,6 +1217,7 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
     <ul class="tight">
       <li><b>iOS push</b> — Android is ready. iOS additionally needs an APNs key uploaded into the Firebase project; until that is done iOS devices register fine and simply never receive anything, with no error to detect. Confirm it is in place before testing on iPhone.</li>
       <li><b>Live variable products</b> — the flow is built and tested (see <a href="#variants">Variable products</a>), but nothing in the catalogue is <code class="inl">variable</code> yet, so you cannot exercise the picker against live data until some are published and active.</li>
+      <li><b>Ticket attachments</b> — tickets are text only, so there is no way to send a screenshot with one. Point customers at chat, which does take attachments and voice notes.</li>
       <li><b>Blog posts</b> — <code class="inl">/blogs</code> returns an empty list until posts are published.</li>
     </ul>
   </section>

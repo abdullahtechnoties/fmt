@@ -60,12 +60,17 @@ class DeviceRepository {
     }
   }
 
-  /// `PUT /notifications/settings` — send either toggle on its own.
-  Future<bool> updateSettings({bool? notifyChat, bool? notifyOrders}) async {
+  /// `PUT /notifications/settings` — send any toggle on its own.
+  Future<bool> updateSettings({
+    bool? notifyChat,
+    bool? notifyOrders,
+    bool? notifySupport,
+  }) async {
     try {
       final body = <String, dynamic>{};
       if (notifyChat != null) body['notify_chat'] = notifyChat;
       if (notifyOrders != null) body['notify_orders'] = notifyOrders;
+      if (notifySupport != null) body['notify_support'] = notifySupport;
       final res = await _network.put(
         endpoint: ApiPath.notificationSettings,
         body: body,

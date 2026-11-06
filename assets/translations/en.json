@@ -50,18 +50,46 @@
   },
   "support":{
     "title": "Support",
+    "my_tickets": "My Tickets",
     "full_name": "Full Name",
     "full_name_hint": "Enter Full Name",
     "email": "Email Address",
     "email_hint": "Enter Email Address",
     "ticket_category": "Ticket Category",
     "ticket_category_hint": "Select",
+    "categories_loading": "Loading categories…",
+    "categories_failed": "Couldn't load categories. Tap to retry.",
     "subject": "Subject",
     "subject_hint": "Write Subject...",
     "describe_issue": "Describe Your Issue",
     "describe_issue_hint": "Write Your Issue...",
-    "submit": "Submit Ticket"
-
+    "submit": "Submit Ticket",
+    "field_required": "This field is required.",
+    "email_invalid": "Enter a valid email address.",
+    "category_required": "Please choose a ticket category.",
+    "load_failed": "Couldn't load support options. Pull to retry.",
+    "raise_failed": "Couldn't raise your ticket. Please try again.",
+    "raise_success": "Ticket raised — your reference is :reference.",
+    "login_title": "Trackable support, after login",
+    "login_prompt": "Log in to raise a support ticket and follow its progress with the store."
+  },
+  "ticket_list":{
+    "title": "My Tickets",
+    "load_failed": "Couldn't load your tickets. Pull to retry.",
+    "empty_title": "No tickets yet",
+    "empty_message": "Raise a ticket and follow the store's replies here.",
+    "new_ticket": "Raise a Ticket"
+  },
+  "ticket_details":{
+    "title": "Ticket",
+    "load_failed": "Couldn't open this ticket. Please try again.",
+    "you": "You",
+    "staff": "Support",
+    "reply_hint": "Write your reply…",
+    "reply_failed": "Couldn't send your reply. Please try again.",
+    "reply_sent": "Reply sent.",
+    "reopen_notice": "This request is :status. Replying will reopen it.",
+    "attach_note": "Tickets are text-only. To send a photo or voice note, continue in chat."
   },
   "profile_edit": {
    "title": "My Profile",

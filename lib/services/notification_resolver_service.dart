@@ -2,6 +2,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fmt/app/modules/chat/controllers/chat_controller.dart';
 import 'package:fmt/app/modules/orderDetails/controllers/order_details_controller.dart';
 import 'package:fmt/app/modules/orderHistory/controllers/order_history_controller.dart';
+import 'package:fmt/app/modules/support/controllers/support_controller.dart';
+import 'package:fmt/app/modules/ticketDetails/controllers/ticket_details_controller.dart';
+import 'package:fmt/app/modules/ticketList/controllers/ticket_list_controller.dart';
 import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/models/chat_model.dart';
 import 'package:fmt/network/service/auth_service.dart';
@@ -11,6 +14,7 @@ import 'package:get/get.dart';
 /// Routes every push by its `data.type`:
 /// - `chat` → `{conversation_id, message_id}` → chat screen
 /// - `order` → `{order_id, status}` → order details (refreshes history)
+/// - `ticket` → `{reference, ticket_id}` → ticket thread by reference
 ///
 /// Guests are ignored (chat is login-only; guest orders have no account
 /// to notify). Taps from a terminated state arrive via getInitialMessage
@@ -36,6 +40,8 @@ class NotificationResolverService {
       _onChat(message, isTap: isTap);
     } else if (type == 'order') {
       _onOrder(message, isTap: isTap);
+    } else if (type == 'ticket') {
+      _onTicket(message, isTap: isTap);
     }
   }
 
@@ -119,6 +125,42 @@ class NotificationResolverService {
         await Get.find<OrderHistoryController>().loadOrders();
       } catch (_) {}
     }
+    if (Get.isRegistered<TicketListController>()) {
+      try {
+        Get.find<TicketListController>().refreshQuietly();
+      } catch (_) {}
+    }
+    if (Get.isRegistered<SupportController>()) {
+      try {
+        Get.find<SupportController>().refreshUnread();
+      } catch (_) {}
+    }
+  }
+
+  // ─── Support tickets ──────────────────────────────────────────────────────
+
+  void _onTicket(RemoteMessage message, {required bool isTap}) {
+    final reference = '${message.data['reference'] ?? ''}'.trim();
+    if (reference.isEmpty) return;
+    if (Get.isRegistered<TicketListController>()) {
+      try {
+        Get.find<TicketListController>().refreshQuietly();
+      } catch (_) {}
+    }
+    if (Get.isRegistered<TicketDetailsController>()) {
+      try {
+        final details = Get.find<TicketDetailsController>();
+        if (details.reference == reference) details.loadTicket();
+      } catch (_) {}
+    }
+    if (!isTap) return;
+    if (Get.currentRoute == Routes.TICKET_DETAILS) {
+      try {
+        final details = Get.find<TicketDetailsController>();
+        if (details.reference == reference) return;
+      } catch (_) {}
+    }
+    Get.toNamed(Routes.TICKET_DETAILS, arguments: reference);
   }
 }
 

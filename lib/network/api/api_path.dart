@@ -60,6 +60,17 @@ class ApiPath {
   static const String devices = '/devices';
   static const String notificationSettings = '/notifications/settings';
 
+  // Support tickets (auth only, addressed by `reference` like TKT-000123).
+  static const String supportCategories = '/support/categories';
+  static const String supportTickets = '/support/tickets';
+  static String supportTicket(Object reference) =>
+      '/support/tickets/$reference';
+  static String supportTicketReplies(Object reference) =>
+      '/support/tickets/$reference/replies';
+  static String supportTicketRead(Object reference) =>
+      '/support/tickets/$reference/read';
+  static const String supportUnread = '/support/unread';
+
   // Pusher private-channel authorizer. Per the API docs this lives
   // outside /v1: `POST /api/broadcasting/auth` with the Bearer token
   // (the website's /broadcasting/auth is cookie-only and rejects apps).

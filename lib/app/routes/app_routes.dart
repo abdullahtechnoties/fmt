@@ -25,6 +25,8 @@ abstract class Routes {
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const ORDER_SUCCESS = _Paths.ORDER_SUCCESS;
   static const ORDER_DETAILS = _Paths.ORDER_DETAILS;
+  static const TICKETS = _Paths.TICKETS;
+  static const TICKET_DETAILS = _Paths.TICKET_DETAILS;
   static const PRIVACY_POLICY = _Paths.PRIVACY_POLICY;
   static const FAQS = _Paths.FAQS;
 
@@ -54,6 +56,8 @@ abstract class _Paths {
   static const FORGOT_PASSWORD = '/forgot-password';
   static const ORDER_SUCCESS = '/order-success';
   static const ORDER_DETAILS = '/order-details';
+  static const TICKETS = '/tickets';
+  static const TICKET_DETAILS = '/ticket-details';
   static const PRIVACY_POLICY = '/privacy-policy';
   static const FAQS = '/faqs';
 }
