@@ -22,6 +22,7 @@ class TicketDetailsView extends GetView<TicketDetailsController> {
         child: Column(
           children: [
             Obx(() => CustomHeaderBar(
+              showmenu: false,
                   title: controller.ticket.value?.reference
                           .isNotEmpty ==
                       true

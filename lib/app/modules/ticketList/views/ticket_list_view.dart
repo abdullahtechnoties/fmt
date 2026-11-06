@@ -20,6 +20,7 @@ class TicketListView extends GetView<TicketListController> {
         child: Column(
           children: [
             CustomHeaderBar(
+              showmenu: false,
               title: 'ticket_list.title'.trns(),
               onMenu: () {},
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/network/service/local_storage.dart';
+import 'package:fmt/services/notification_resolver_service.dart';
 import 'package:fmt/services/notification_service.dart';
 import 'package:fmt/repositories/auth_repository.dart';
 import 'package:fmt/utilities/app_strings.dart';
@@ -110,6 +111,18 @@ class LoginController extends GetxController {
         message: 'auth.login.successMessage'.trns(),
       );
       Get.offAllNamed(Routes.BOTTOMNAV);
+      // Terminated-state tap that waited out the login screen: route it
+      // now that the session (and the bottom nav underneath) exists.
+      // Splash does the same flush on its own path; login bypasses
+      // splash, so without this the tap would be silently dropped.
+      Future.delayed(const Duration(milliseconds: 600), () {
+        try {
+          final tap = FmtNotificationService.instance
+              .consumePendingTap();
+          NotificationResolverService.instance
+              .handlePendingLaunch(tap);
+        } catch (_) {}
+      });
     } finally {
       isLoading.value = false;
     }

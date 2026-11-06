@@ -21,6 +21,7 @@ class SupportView extends GetView<SupportController> {
         child: Column(
           children: [
             CustomHeaderBar(
+              showmenu: false,
               title: 'support.title'.trns(),
               onMenu: () {},
             ),
