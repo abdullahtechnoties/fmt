@@ -62,8 +62,12 @@ class CheckoutStepper extends StatelessWidget {
             fit: BoxFit.contain,
             // Fallback for missing assets during development
             errorBuilder: (context, error, stackTrace) => Icon(
-              index == 0 ? Icons.local_shipping : (index == 1 ? Icons.credit_card : Icons.assignment),
-              color: isActiveOrCompleted ? AppColors.primary : AppColors.lightGrey,
+              index == 0
+                  ? Icons.local_shipping
+                  : (index == 1 ? Icons.credit_card : Icons.assignment),
+              color: isActiveOrCompleted
+                  ? AppColors.primary
+                  : AppColors.lightGrey,
               size: R.sp(28),
             ),
           ),
@@ -74,7 +78,9 @@ class CheckoutStepper extends StatelessWidget {
           style: TextStyle(
             fontSize: R.sp(12),
             fontWeight: FontWeight.w600,
-            color: isActiveOrCompleted ? AppColors.primary : AppColors.lightGrey,
+            color: isActiveOrCompleted
+                ? AppColors.primary
+                : AppColors.lightGrey,
           ),
         ),
       ],
@@ -88,7 +94,9 @@ class CheckoutStepper extends StatelessWidget {
         padding: EdgeInsets.only(top: R.h(16), left: R.w(8), right: R.w(8)),
         child: Container(
           height: 1.5,
-          color: isCompleted ? AppColors.primary : AppColors.lightGrey.withOpacity(0.5),
+          color: isCompleted
+              ? AppColors.primary
+              : AppColors.lightGrey.withOpacity(0.5),
         ),
       ),
     );

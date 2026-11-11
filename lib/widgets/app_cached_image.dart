@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fmt/utilities/colors.dart';
 import 'package:fmt/widgets/shimmer_box.dart';
+
 class AppCachedImage extends StatelessWidget {
   const AppCachedImage({
     super.key,
@@ -11,6 +12,8 @@ class AppCachedImage extends StatelessWidget {
     this.height,
     this.borderRadius,
     this.showShimmer = true,
+    this.httpHeaders,
+    this.cacheKey,
   });
 
   final String? imageUrl;
@@ -19,6 +22,11 @@ class AppCachedImage extends StatelessWidget {
   final double? height;
   final BorderRadius? borderRadius;
   final bool showShimmer;
+
+  /// Used for private files such as payment proofs. The API requires the
+  /// bearer token even when the image is loaded by an image widget.
+  final Map<String, String>? httpHeaders;
+  final String? cacheKey;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +41,8 @@ class AppCachedImage extends StatelessWidget {
         fit: fit,
         width: width,
         height: height,
+        httpHeaders: httpHeaders,
+        cacheKey: cacheKey,
         placeholder: (context, url) => showShimmer
             ? ShimmerBox(
                 width: width ?? double.infinity,
@@ -62,8 +72,10 @@ class AppCachedImage extends StatelessWidget {
       width: width,
       height: height,
       color: AppColors.shimmerBase,
-      child: const Icon(Icons.image_not_supported_outlined,
-          color: AppColors.lightGrey),
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: AppColors.lightGrey,
+      ),
     );
   }
 }

@@ -40,6 +40,26 @@
     "empty_title": "No orders yet",
     "empty_message": "Your orders will appear here once you place one."
   },
+  "payment_proof": {
+    "title": "Payment Proof",
+    "optional": "Optional",
+    "hint": "Already paid? Attach a screenshot of your transfer receipt.",
+    "add": "Attach Payment Proof",
+    "replace": "Replace",
+    "note": "This is optional. If you pay later, you can attach the receipt from the order screen.",
+    "rules": ":types · up to :size MB",
+    "attached": "Attached",
+    "not_attached": "Not attached (optional)",
+    "pick_failed": "Couldn't pick the file. Please try again.",
+    "invalid_type": "Choose one of these file types: :types.",
+    "too_large": "This file is larger than :size MB. Please choose a smaller file.",
+    "upload_failed": "Couldn't upload the payment proof. Please try again.",
+    "uploaded": "Payment proof uploaded. Our team will verify it shortly.",
+    "none": "No payment proof attached yet.",
+    "upload": "Upload Payment Proof",
+    "replace_proof": "Replace Payment Proof",
+    "view": "View"
+  },
   "order_details": {
     "title": "Order Details",
     "load_failed": "Couldn't load this order. Please try again.",

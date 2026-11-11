@@ -24,6 +24,13 @@ class AuthService extends GetxService {
   bool get isCustomer => currentUser.value != null;
   bool get hasAllowedRole => isCustomer;
 
+  /// Auth header for private files (e.g. payment proofs) loaded outside Dio.
+  Map<String, String> get authHeaders {
+    final token = accessToken.value;
+    if (token == null || token.isEmpty) return const {};
+    return {'Authorization': 'Bearer $token'};
+  }
+
   @override
   void onInit() async {
     super.onInit();

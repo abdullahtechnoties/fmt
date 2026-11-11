@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/models/cart_model.dart';
+import 'package:fmt/models/payment_proof_model.dart';
 import 'package:fmt/network/service/auth_service.dart';
 import 'package:fmt/repositories/cart_repository.dart';
 import 'package:fmt/repositories/checkout_repository.dart';
@@ -9,25 +13,24 @@ import 'package:fmt/utilities/snackbar_service.dart';
 import 'package:fmt/utilities/translation_extention.dart';
 import 'package:get/get.dart';
 
-/// 3-step checkout (shipping → COD payment → review) wired to
+/// 3-step checkout (shipping → optional payment proof → review) wired to
 /// `GET /checkout/summary` and `POST /orders`.
 ///
 /// Step 1 fields map 1:1 to the API's billing_* payload and prefill from
-/// the saved address + logged-in user. Step 2 is Cash on Delivery only —
-/// the API has no gateway; card methods stay commented out in the view
-/// until the backend supports them. Success routes to ORDER_SUCCESS with
-/// the order + prefilled WhatsApp deep link.
+/// the saved address + logged-in user. Step 2 replaces the old payment
+/// selector with the API's optional Payment Proof upload. Success routes to
+/// ORDER_SUCCESS with the order + prefilled WhatsApp deep link.
 class CheckoutController extends GetxController {
   CheckoutController({
     CheckoutRepository? checkoutRepo,
     CartRepository? cartRepo,
-  })  : _checkoutRepo = checkoutRepo ?? CheckoutRepository(),
-        _cartRepo = cartRepo ?? CartRepository();
+  }) : _checkoutRepo = checkoutRepo ?? CheckoutRepository(),
+       _cartRepo = cartRepo ?? CartRepository();
 
   final CheckoutRepository _checkoutRepo;
   final CartRepository _cartRepo;
 
-  // Current Step: 0 = Shipping, 1 = Payment, 2 = Review
+  // Current Step: 0 = Shipping, 1 = Payment Proof, 2 = Review
   final currentStep = 0.obs;
 
   final isLoadingSummary = true.obs;
@@ -50,14 +53,16 @@ class CheckoutController extends GetxController {
   final postalController = TextEditingController();
   final notesController = TextEditingController();
 
-  // --- Step 2: Payment (COD only for v1) ---
-  final selectedPaymentMethod = 'COD'.obs;
+  // --- Step 2: Payment Proof (optional, never blocks the order) ---
+  final Rxn<PlatformFile> paymentProof = Rxn<PlatformFile>();
 
   // --- Step 3: Review acknowledgement (required to place the order) ---
   final agreedToConfirm = false.obs;
 
   AuthService get _auth => Get.find<AuthService>();
   StoreService get _storeService => Get.find<StoreService>();
+
+  PaymentProofRules get paymentProofRules => summary.value.paymentProofRules;
 
   // Kept while the legacy design still binds dropdowns elsewhere.
   final provinces = ['Sindh', 'Punjab', 'KPK', 'Balochistan'];
@@ -135,8 +140,13 @@ class CheckoutController extends GetxController {
 
     fill(fullNameController, ['name', 'full_name', 'billing_name']);
     fill(emailController, ['email', 'billing_email']);
-    fill(phoneController,
-        ['phone', 'billing_phone', 'contact', 'whatsapp', 'mobile']);
+    fill(phoneController, [
+      'phone',
+      'billing_phone',
+      'contact',
+      'whatsapp',
+      'mobile',
+    ]);
     // Street prefers the delivery line the customer typed in the delivery
     // sheet, then the billing block. City also accepts `district` (the
     // register form stores district where the address record stores city).
@@ -145,7 +155,7 @@ class CheckoutController extends GetxController {
       'shipping_address',
       'address',
       'street',
-      'billing_address'
+      'billing_address',
     ]);
     fill(cityController, ['city', 'billing_city', 'district']);
     fill(provinceController, ['province', 'billing_province', 'state']);
@@ -197,6 +207,62 @@ class CheckoutController extends GetxController {
     return null;
   }
 
+  // ─── Payment proof ───────────────────────────────────────────────────────
+
+  Future<void> pickPaymentProof() async {
+    final rules = paymentProofRules;
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: rules.accepts,
+        allowMultiple: false,
+        withData: false,
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      final error = rules.validateFile(name: file.name, size: file.size);
+      if (error != null) {
+        SnackbarService.showError(
+          title: 'common.error'.trns(),
+          message: _proofErrorMessage(error, rules),
+        );
+        return;
+      }
+      if ((file.path ?? '').isEmpty) {
+        SnackbarService.showError(
+          title: 'common.error'.trns(),
+          message: 'payment_proof.pick_failed'.trns(),
+        );
+        return;
+      }
+      paymentProof.value = file;
+    } catch (_) {
+      SnackbarService.showError(
+        title: 'common.error'.trns(),
+        message: 'payment_proof.pick_failed'.trns(),
+      );
+    }
+  }
+
+  void removePaymentProof() {
+    paymentProof.value = null;
+  }
+
+  String _proofErrorMessage(
+    PaymentProofFileError error,
+    PaymentProofRules rules,
+  ) {
+    switch (error) {
+      case PaymentProofFileError.tooLarge:
+        return 'payment_proof.too_large'.trnsFormat({'size': rules.maxMbLabel});
+      case PaymentProofFileError.unsupportedType:
+        return 'payment_proof.invalid_type'.trnsFormat({
+          'types': rules.accepts.map((e) => e.toUpperCase()).join(', '),
+        });
+    }
+  }
+
   // ─── Place order ─────────────────────────────────────────────────────────
 
   Future<void> placeOrder() async {
@@ -208,6 +274,17 @@ class CheckoutController extends GetxController {
       );
       return;
     }
+
+    final pickedProof = paymentProof.value;
+    final proofPath = (pickedProof?.path ?? '').trim();
+    if (pickedProof != null && proofPath.isEmpty) {
+      SnackbarService.showError(
+        title: 'common.error'.trns(),
+        message: 'payment_proof.pick_failed'.trns(),
+      );
+      return;
+    }
+
     isPlacingOrder.value = true;
     try {
       final res = await _checkoutRepo.placeOrder(
@@ -220,10 +297,11 @@ class CheckoutController extends GetxController {
         country: countryController.text.trim().isEmpty
             ? 'Pakistan'
             : countryController.text.trim(),
-        paymentMethod: selectedPaymentMethod.value,
         zip: postalController.text.trim(),
         notes: notesController.text.trim(),
         storeId: _storeService.selectedStoreId,
+        paymentProof: pickedProof == null ? null : File(proofPath),
+        paymentProofField: paymentProofRules.field,
       );
       if (res.isError || res.data == null) {
         SnackbarService.showError(
@@ -241,8 +319,9 @@ class CheckoutController extends GetxController {
           'orderId': order.id,
           'status': order.status ?? 'pending',
           'total': order.total,
-          'paymentMethod': order.paymentMethod ?? 'COD',
+          'paymentMethod': order.paymentMethod ?? 'Online Payment',
           'whatsappUrl': order.whatsappUrl,
+          'hasPaymentProof': order.paymentProof != null,
         },
       );
     } finally {

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:fmt/models/cart_model.dart';
+import 'package:fmt/models/payment_proof_model.dart';
 import 'package:fmt/network/api/api_path.dart';
 import 'package:fmt/network/response/api_response.dart';
 import 'package:fmt/network/service/network_service.dart';
@@ -7,17 +10,22 @@ import 'package:get/get.dart';
 /// Checkout + order placement API (auth only).
 class CheckoutRepository {
   CheckoutRepository({NetworkService? network})
-      : _network = network ?? Get.find();
+    : _network = network ?? Get.find();
 
   final NetworkService _network;
 
   /// `GET /checkout/summary` — recalculated cart, saved address for
-  /// prefill, payment methods and notice lines. 422 when the cart is empty.
+  /// prefill, payment-proof rules and notice lines. 422 when the cart is
+  /// empty.
   Future<ApiResponse<Map<String, dynamic>>> summary() {
     return _network.get(endpoint: ApiPath.checkoutSummary);
   }
 
   /// `POST /orders` — revalidates stock, creates the order, empties the cart.
+  ///
+  /// Sent as multipart/form-data when [paymentProof] is attached and as
+  /// ordinary JSON when it is not. A rejected proof rolls the whole order
+  /// back, so the customer can retry without creating a duplicate.
   Future<ApiResponse<Map<String, dynamic>>> placeOrder({
     required String name,
     required String email,
@@ -26,28 +34,34 @@ class CheckoutRepository {
     required String city,
     required String province,
     required String country,
-    String paymentMethod = 'COD',
     String? zip,
     String? notes,
     int? storeId,
+    File? paymentProof,
+    String paymentProofField = 'payment_proof',
   }) {
-    return _network.post(
-      endpoint: ApiPath.orders,
-      body: {
-        'billing_name': name,
-        'billing_email': email,
-        'billing_phone': phone,
-        'billing_address': address,
-        'billing_city': city,
-        'billing_province': province,
-        'billing_country': country,
-        'payment_method': paymentMethod,
-        if (zip != null && zip.trim().isNotEmpty) 'billing_zip': zip.trim(),
-        if (notes != null && notes.trim().isNotEmpty)
-          'order_notes': notes.trim(),
-        if (storeId != null) 'store_id': storeId,
-      },
-    );
+    final fields = <String, dynamic>{
+      'billing_name': name,
+      'billing_email': email,
+      'billing_phone': phone,
+      'billing_address': address,
+      'billing_city': city,
+      'billing_province': province,
+      'billing_country': country,
+      if (zip != null && zip.trim().isNotEmpty) 'billing_zip': zip.trim(),
+      if (notes != null && notes.trim().isNotEmpty) 'order_notes': notes.trim(),
+      if (storeId != null) 'store_id': storeId,
+    };
+
+    if (paymentProof != null) {
+      return _network.postForm(
+        endpoint: ApiPath.orders,
+        fields: fields,
+        files: {paymentProofField: paymentProof},
+      );
+    }
+
+    return _network.post(endpoint: ApiPath.orders, body: fields);
   }
 }
 
@@ -57,19 +71,18 @@ class CheckoutSummary {
   const CheckoutSummary({
     this.cart,
     this.savedAddress = const {},
-    this.paymentMethods = const [],
+    this.paymentProofRules = const PaymentProofRules(),
     this.notices = const [],
   });
 
   final CartData? cart;
   final Map<String, dynamic> savedAddress;
-  final List<String> paymentMethods;
+  final PaymentProofRules paymentProofRules;
   final List<String> notices;
 
-  static Map<String, dynamic> _map(dynamic v) =>
-      v is Map<String, dynamic>
-          ? v
-          : (v is Map ? Map<String, dynamic>.from(v) : <String, dynamic>{});
+  static Map<String, dynamic> _map(dynamic v) => v is Map<String, dynamic>
+      ? v
+      : (v is Map ? Map<String, dynamic>.from(v) : <String, dynamic>{});
 
   static CheckoutSummary fromBody(Map<String, dynamic>? body) {
     if (body == null) return const CheckoutSummary();
@@ -78,7 +91,7 @@ class CheckoutSummary {
     final rawCart = data['cart'];
     final rawAddress =
         data['saved_address'] ?? data['address'] ?? data['billing_address'];
-    final rawMethods = data['payment_methods'];
+    final rawProofRules = data['payment_proof'];
     final rawNotices =
         data['notices'] ?? data['notice_lines'] ?? data['notice'];
     return CheckoutSummary(
@@ -86,9 +99,7 @@ class CheckoutSummary {
           ? CartData.fromBody({'data': Map<String, dynamic>.from(rawCart)})
           : null,
       savedAddress: _map(rawAddress),
-      paymentMethods: rawMethods is List
-          ? rawMethods.map((e) => e.toString()).toList()
-          : const [],
+      paymentProofRules: PaymentProofRules.fromJson(_map(rawProofRules)),
       notices: rawNotices is List
           ? rawNotices.map((e) => e.toString()).toList()
           : (rawNotices is String ? [rawNotices] : const []),
@@ -104,6 +115,7 @@ class PlacedOrder {
     this.paymentMethod,
     this.total = 0,
     this.whatsappUrl,
+    this.paymentProof,
   });
 
   final dynamic id;
@@ -111,6 +123,7 @@ class PlacedOrder {
   final String? paymentMethod;
   final double total;
   final String? whatsappUrl;
+  final PaymentProof? paymentProof;
 
   static PlacedOrder fromBody(Map<String, dynamic>? body) {
     final data = body?['data'];
@@ -125,8 +138,10 @@ class PlacedOrder {
       status: order is Map ? order['status']?.toString() : null,
       paymentMethod: order is Map ? order['payment_method']?.toString() : null,
       total: total,
-      whatsappUrl:
-          data is Map ? data['whatsapp_url']?.toString() : null,
+      whatsappUrl: data is Map ? data['whatsapp_url']?.toString() : null,
+      paymentProof: PaymentProof.tryParse(
+        order is Map ? order['payment_proof'] : null,
+      ),
     );
   }
 }

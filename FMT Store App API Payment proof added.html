@@ -338,7 +338,7 @@
   <header class="masthead">
     <p class="eyebrow">Mobile API Reference · v1</p>
     <h1>FMT Store App API</h1>
-    <p class="lede">Everything the mobile app needs to reproduce the fmtonlinestore.com storefront: branch selection, catalog, cart, checkout and account. Chat is not covered yet.</p>
+    <p class="lede">Everything the mobile app needs to reproduce the fmtonlinestore.com storefront: branch selection, catalog, cart, checkout, orders, account, chat and support tickets.</p>
     <div class="meta-strip">
       <span><b>Base URL</b> https://www.fmtonlinestore.com/api/v1</span>
       <span><b>Auth</b> Laravel Sanctum (Bearer)</span>
@@ -357,6 +357,7 @@
       <a href="#variants">Variants</a>
       <a href="#cart">Cart</a>
       <a href="#checkout">Checkout</a>
+      <a href="#payment">Payment proof</a>
       <a href="#orders">Orders</a>
       <a href="#account">Account</a>
       <a href="#content">Content</a>
@@ -810,18 +811,21 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
     <h3>Checkout</h3>
     <article class="ep">
       <div class="ep-head"><span class="m m-get">GET</span><code class="path">/checkout/summary</code><span class="pill pill-auth">Auth</span></div>
-      <p>Recalculated cart, saved address for prefill, branch list, payment methods and the three notice lines shown on the website checkout. Returns <span class="num">422</span> when the cart is empty.</p>
+      <p>Recalculated cart, saved address for prefill, branch list, the payment-proof rules and the three notice lines shown on the website checkout. Returns <span class="num">422</span> when the cart is empty.</p>
     </article>
     <article class="ep">
       <div class="ep-head"><span class="m m-post">POST</span><code class="path">/orders</code><span class="pill pill-auth">Auth</span></div>
       <p>Places the order: revalidates stock, creates the order, emails the customer and the store, then empties the cart.</p>
     </article>
 
-    <p>Required body: <code class="inl">billing_name</code>, <code class="inl">billing_email</code>, <code class="inl">billing_phone</code>, <code class="inl">billing_address</code>, <code class="inl">billing_city</code>, <code class="inl">billing_province</code>, <code class="inl">billing_country</code>, <code class="inl">payment_method</code>. Optional: <code class="inl">billing_zip</code>, <code class="inl">order_notes</code>, <code class="inl">store_id</code>.</p>
+    <p>Required body: <code class="inl">billing_name</code>, <code class="inl">billing_email</code>, <code class="inl">billing_phone</code>, <code class="inl">billing_address</code>, <code class="inl">billing_city</code>, <code class="inl">billing_province</code>, <code class="inl">billing_country</code>. Optional: <code class="inl">billing_zip</code>, <code class="inl">order_notes</code>, <code class="inl">store_id</code>, <code class="inl">payment_proof</code>.</p>
+    <p class="muted">Send the call as <code class="inl">multipart/form-data</code> when you are attaching a <code class="inl">payment_proof</code> file, and as ordinary JSON when you are not.</p>
 
-    <div class="note">
-      <p class="note-t">Payment follows the website</p>
-      <p>Cash on delivery, with a partial advance confirmed over WhatsApp. There is no payment gateway. After a successful order the customer must message the store to confirm — so the response hands you a ready-made deep link.</p>
+    <div class="note warn">
+      <p class="note-t">There is no payment method to choose</p>
+      <p>Cash on delivery has been withdrawn, and <code class="inl">payment_method</code> is no longer a field you send — <code class="inl">GET /checkout/summary</code> no longer returns a <code class="inl">payment_methods</code> list either. Do not render a payment selector. Offer the optional <a href="#payment">payment proof</a> upload in its place.</p>
+      <p>Sending <code class="inl">payment_method</code> anyway is harmless; the server ignores it. The order is still recorded against a payment method internally, now always <code class="inl">"Online Payment"</code>.</p>
+      <p>There is no payment gateway. After a successful order the customer must message the store to confirm and arrange the advance — so the response hands you a ready-made WhatsApp deep link.</p>
     </div>
 
 <pre><code>{
@@ -831,7 +835,8 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
     <span class="tok-key">"order"</span>: {
       <span class="tok-key">"id"</span>: <span class="tok-num">475</span>,
       <span class="tok-key">"status"</span>: <span class="tok-str">"pending"</span>,
-      <span class="tok-key">"payment_method"</span>: <span class="tok-str">"COD"</span>,
+      <span class="tok-key">"payment_method"</span>: <span class="tok-str">"Online Payment"</span>,
+      <span class="tok-key">"payment_proof"</span>: null,   <span class="tok-com">// or the object shown under Payment proof</span>
       <span class="tok-key">"total"</span>: <span class="tok-num">1800</span>,
       <span class="tok-key">"store"</span>: { <span class="tok-key">"id"</span>: <span class="tok-num">26</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Online Delivery"</span> },
       <span class="tok-key">"items"</span>: [ <span class="tok-com">/* see the item shape under Orders */</span> ]
@@ -841,6 +846,57 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
 }</code></pre>
 
     <p>Open <code class="inl">whatsapp_url</code> directly. The message is prefilled with the order number, branch, every line item, the total, and the customer's own name, phone and address — the customer only presses send. Show a clear "Contact on WhatsApp to confirm" step after checkout, as the website does.</p>
+
+    <h3 id="payment" style="margin-top:36px">Payment proof</h3>
+    <p>The customer can attach a screenshot of their transfer receipt. It replaces the payment selector that used to sit on this screen, and it is what the store checks before confirming an order.</p>
+
+    <div class="note">
+      <p class="note-t">Optional, by design</p>
+      <p>Most customers are given the account details on WhatsApp <em>after</em> ordering, so they have nothing to attach at checkout. Never block the order on it. Label it <b>Payment Proof</b> and mark it optional, exactly as the website does, then offer the upload again on the order screen for anyone who pays later.</p>
+    </div>
+
+    <h4>What the server accepts</h4>
+    <p>Read these from <code class="inl">GET /checkout/summary</code> rather than hardcoding them:</p>
+<pre><code>{ <span class="tok-key">"payment_proof"</span>: {
+    <span class="tok-key">"field"</span>:    <span class="tok-str">"payment_proof"</span>,
+    <span class="tok-key">"label"</span>:    <span class="tok-str">"Payment Proof"</span>,
+    <span class="tok-key">"hint"</span>:     <span class="tok-str">"Already paid? Attach a screenshot of your transfer receipt."</span>,
+    <span class="tok-key">"required"</span>: false,
+    <span class="tok-key">"accepts"</span>:  [<span class="tok-str">"jpg"</span>, <span class="tok-str">"jpeg"</span>, <span class="tok-str">"png"</span>, <span class="tok-str">"webp"</span>, <span class="tok-str">"pdf"</span>],
+    <span class="tok-key">"max_kb"</span>:   <span class="tok-num">5120</span>
+} }</code></pre>
+    <p class="muted">A file of the wrong type or over 5 MB is rejected with <span class="num">422</span> keyed on <code class="inl">payment_proof</code>. The type is checked by content, not by extension. At checkout a rejected file means <b>no order is created at all</b> — the whole request rolls back, so the customer can fix the file and retry without ending up with a duplicate order.</p>
+
+    <h4>Attaching one after the order was placed</h4>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-post">POST</span><code class="path">/orders/{id}/payment-proof</code><span class="pill pill-auth">Auth</span></div>
+      <p><code class="inl">multipart/form-data</code> with a <b>required</b> <code class="inl">payment_proof</code> file. Uploading again replaces the previous file — there is only ever one proof per order. Returns the proof object.</p>
+    </article>
+<pre><code>POST /orders/509/payment-proof        <span class="tok-com">// multipart</span>
+
+{ <span class="tok-key">"success"</span>: true,
+  <span class="tok-key">"message"</span>: <span class="tok-str">"Payment proof uploaded. Our team will verify it shortly."</span>,
+  <span class="tok-key">"data"</span>: { <span class="tok-key">"payment_proof"</span>: {
+    <span class="tok-key">"url"</span>:         <span class="tok-str">"https://www.fmtonlinestore.com/orders/509/payment-proof"</span>,
+    <span class="tok-key">"api_url"</span>:     <span class="tok-str">"https://www.fmtonlinestore.com/api/v1/orders/509/payment-proof"</span>,
+    <span class="tok-key">"name"</span>:        <span class="tok-str">"receipt.png"</span>,
+    <span class="tok-key">"mime"</span>:        <span class="tok-str">"image/png"</span>,
+    <span class="tok-key">"size"</span>:        <span class="tok-num">20481</span>,
+    <span class="tok-key">"is_pdf"</span>:      false,
+    <span class="tok-key">"uploaded_at"</span>: <span class="tok-str">"2026-11-10T06:31:02.000000Z"</span>
+  } } }</code></pre>
+    <p class="muted">An order belonging to another customer returns <span class="num">404</span>, so this cannot be used to attach files to someone else's order.</p>
+
+    <h4>Showing it back to the customer</h4>
+    <article class="ep">
+      <div class="ep-head"><span class="m m-get">GET</span><code class="path">/orders/{id}/payment-proof</code><span class="pill pill-auth">Auth</span></div>
+      <p>Streams the file itself, with its real <code class="inl">Content-Type</code>. Add <code class="inl">?download=1</code> to get it as an attachment instead of inline.</p>
+    </article>
+    <div class="note warn">
+      <p class="note-t">This image needs your auth header</p>
+      <p>Payment screenshots show bank details, so they are <b>not</b> public files and there is no shareable link to one. Unlike product images and chat attachments, you cannot drop <code class="inl">api_url</code> into a plain image view — the request must carry <code class="inl">Authorization: Bearer</code>. Fetch the bytes yourself and render them, or use an image loader that lets you set headers. Without the header you get <span class="num">401</span>; for an order that is not yours, <span class="num">404</span>.</p>
+      <p>Use <code class="inl">api_url</code> from the app. The <code class="inl">url</code> field is the website's session-authenticated equivalent, for the browser.</p>
+    </div>
   </section>
 
   <section id="orders">
@@ -874,6 +930,7 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
 }</code></pre>
     <p class="muted"><code class="inl">product_title</code> is the name as it was when the order was placed, so it stays correct even if the product is renamed later. <code class="inl">thumbnail</code> and <code class="inl">product_slug</code> are null if the product has since been removed from the catalog — fall back to a placeholder and don't link it.</p>
     <p class="muted">Orders belonging to another user return <span class="num">404</span>, never another customer's data.</p>
+    <p>Every order also carries <code class="inl">payment_proof</code> — <code class="inl">null</code> until the customer attaches a receipt, otherwise the object shown under <a href="#payment">Payment proof</a>. Use it to decide whether the order screen shows "Upload payment proof" or the receipt the customer already sent.</p>
   </section>
 
   <section id="account">
@@ -1207,6 +1264,8 @@ curl -X POST -H <span class="tok-str">"X-Store-Id: 26"</span> -H <span class="to
       <li><b>Checkout needs a login.</b> There is no guest checkout, matching the website. Prompt for login when the cart is not empty rather than at app start.</li>
       <li><b>Persist the <code class="inl">cart_token</code></b> in secure storage, and send it on login so a guest cart is not lost.</li>
       <li><b>The order is not finished at checkout.</b> It is <code class="inl">pending</code> until the customer messages the store on WhatsApp and pays the advance. Make that step prominent.</li>
+      <li><b>There is no payment selector any more.</b> Cash on delivery is gone and <code class="inl">payment_method</code> is not a field you send. Show the optional <a href="#payment">payment proof</a> upload instead.</li>
+      <li><b>A payment proof is not a public image.</b> It needs your bearer token on the request, so it cannot be loaded by URL alone like a product photo.</li>
       <li><b>Chat is login-only.</b> There is one thread per account and no guest chat, so gate the chat entry point behind login rather than showing it and failing.</li>
       <li><b>Support tickets are login-only too</b>, and are addressed by <code class="inl">reference</code> rather than a numeric id. A customer replying to a finished ticket reopens it, so re-read the status from the response.</li>
       <li><b>Don't trust a push to arrive.</b> Delivery is best-effort and the customer may have muted it or denied the OS permission. Refresh chat and orders when the app resumes instead of relying on notifications to drive state.</li>

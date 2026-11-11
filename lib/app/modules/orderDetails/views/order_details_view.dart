@@ -30,10 +30,10 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                   return const _DetailsShimmer();
                 }
                 final detail = controller.detail.value;
-                if (controller.loadError.value != null ||
-                    detail == null) {
+                if (controller.loadError.value != null || detail == null) {
                   return _ErrorState(
-                    message: controller.loadError.value ??
+                    message:
+                        controller.loadError.value ??
                         'order_details.load_failed'.trns(),
                     onRetry: controller.loadDetail,
                   );
@@ -46,7 +46,11 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                       parent: BouncingScrollPhysics(),
                     ),
                     padding: EdgeInsets.fromLTRB(
-                        R.w(20), R.h(4), R.w(20), R.h(24)),
+                      R.w(20),
+                      R.h(4),
+                      R.w(20),
+                      R.h(24),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -55,9 +59,13 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                         _ItemsCard(items: detail.items),
                         SizedBox(height: R.h(16)),
                         _SummaryCard(detail: detail),
+                        SizedBox(height: R.h(16)),
+                        _PaymentProofCard(
+                          detail: detail,
+                          controller: controller,
+                        ),
                         if ((detail.billingName ?? '').isNotEmpty ||
-                            (detail.billingAddress ?? '')
-                                .isNotEmpty) ...[
+                            (detail.billingAddress ?? '').isNotEmpty) ...[
                           SizedBox(height: R.h(16)),
                           _BillingCard(detail: detail),
                         ],
@@ -72,8 +80,7 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                               onPressed: controller.openWhatsapp,
                             ),
                           ),
-                        if (detail.hasWhatsapp)
-                          SizedBox(height: R.h(12)),
+                        if (detail.hasWhatsapp) SizedBox(height: R.h(12)),
                         // In-app confirmation lives beside WhatsApp so a
                         // pending order can be confirmed from its history.
                         SizedBox(
@@ -86,20 +93,20 @@ class OrderDetailsView extends GetView<OrderDetailsController> {
                           ),
                         ),
                         SizedBox(height: R.h(12)),
-                        Obx(() => SizedBox(
-                              height: R.h(50),
-                              child: MainBtn(
-                                text: 'order_details.invoice_btn'.trns(),
-                                color: AppColors.darkGrey,
-                                borderRadius: 12,
-                                isLoading:
-                                    controller.isOpeningInvoice.value,
-                                onPressed: controller
-                                        .isOpeningInvoice.value
-                                    ? null
-                                    : controller.openInvoice,
-                              ),
-                            )),
+                        Obx(
+                          () => SizedBox(
+                            height: R.h(50),
+                            child: MainBtn(
+                              text: 'order_details.invoice_btn'.trns(),
+                              color: AppColors.darkGrey,
+                              borderRadius: 12,
+                              isLoading: controller.isOpeningInvoice.value,
+                              onPressed: controller.isOpeningInvoice.value
+                                  ? null
+                                  : controller.openInvoice,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -147,12 +154,13 @@ class _HeaderCard extends StatelessWidget {
               const Spacer(),
               Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: R.w(12), vertical: R.h(6)),
+                  horizontal: R.w(12),
+                  vertical: R.h(6),
+                ),
                 decoration: BoxDecoration(
                   color: bg,
                   borderRadius: BorderRadius.circular(R.w(20)),
-                  border:
-                      Border.all(color: color.withValues(alpha: 0.4)),
+                  border: Border.all(color: color.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   detail.summary.statusLabel,
@@ -172,19 +180,16 @@ class _HeaderCard extends StatelessWidget {
               [
                 if ((detail.summary.createdAt ?? '').isNotEmpty)
                   detail.summary.createdAt!,
-                if ((detail.storeName ?? '').isNotEmpty)
-                  detail.storeName!,
+                if ((detail.storeName ?? '').isNotEmpty) detail.storeName!,
               ].join('  •  '),
-              style:
-                  TextStyle(fontSize: R.sp(12), color: AppColors.grey),
+              style: TextStyle(fontSize: R.sp(12), color: AppColors.grey),
             ),
           ],
           if ((detail.summary.paymentMethod ?? '').isNotEmpty) ...[
             SizedBox(height: R.h(4)),
             Text(
               '${'checkout.payment'.trns()}: ${detail.summary.paymentMethod}',
-              style:
-                  TextStyle(fontSize: R.sp(12), color: AppColors.grey),
+              style: TextStyle(fontSize: R.sp(12), color: AppColors.grey),
             ),
           ],
         ],
@@ -309,8 +314,12 @@ class _SummaryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _row('order_details.subtotal'.trns(), detail.subtotal, money,
-              bold: false),
+          _row(
+            'order_details.subtotal'.trns(),
+            detail.subtotal,
+            money,
+            bold: false,
+          ),
           SizedBox(height: R.h(10)),
           Divider(color: AppColors.inputBorder, height: 1),
           SizedBox(height: R.h(10)),
@@ -320,8 +329,12 @@ class _SummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _row(String label, double value, NumberFormat money,
-      {required bool bold}) {
+  Widget _row(
+    String label,
+    double value,
+    NumberFormat money, {
+    required bool bold,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -373,8 +386,7 @@ class _BillingCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: R.h(10)),
-          if ((detail.billingName ?? '').isNotEmpty)
-            _line(detail.billingName!),
+          if ((detail.billingName ?? '').isNotEmpty) _line(detail.billingName!),
           if ((detail.billingPhone ?? '').isNotEmpty)
             _line(detail.billingPhone!),
           if ((detail.billingAddress ?? '').isNotEmpty)
@@ -397,6 +409,218 @@ class _BillingCard extends StatelessWidget {
   }
 }
 
+class _PaymentProofCard extends StatelessWidget {
+  const _PaymentProofCard({required this.detail, required this.controller});
+
+  final OrderDetail detail;
+  final OrderDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final proof =
+          controller.detail.value?.paymentProof ?? detail.paymentProof;
+      final uploading = controller.isUploadingProof.value;
+      final imageUrl = controller.paymentProofApiUrl ?? '';
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(R.w(16)),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(R.w(16)),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'payment_proof.title'.trns(),
+                    style: TextStyle(
+                      fontSize: R.sp(16),
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.darkGrey,
+                    ),
+                  ),
+                ),
+                if (proof == null)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: R.w(10),
+                      vertical: R.h(4),
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(R.w(20)),
+                    ),
+                    child: Text(
+                      'payment_proof.optional'.trns(),
+                      style: TextStyle(
+                        fontSize: R.sp(11),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(height: R.h(12)),
+            if (proof == null) ...[
+              Text(
+                'payment_proof.none'.trns(),
+                style: TextStyle(
+                  fontSize: R.sp(13),
+                  height: 1.4,
+                  color: AppColors.mediumGrey,
+                ),
+              ),
+              SizedBox(height: R.h(12)),
+              SizedBox(
+                height: R.h(46),
+                child: MainBtn(
+                  text: 'payment_proof.upload'.trns(),
+                  color: AppColors.primary,
+                  borderRadius: 10,
+                  isLoading: uploading,
+                  onPressed: uploading ? null : controller.pickPaymentProof,
+                ),
+              ),
+            ] else ...[
+              if (proof.isPdf)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(R.w(14)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(R.w(10)),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf_outlined,
+                        color: AppColors.primary,
+                        size: R.sp(34),
+                      ),
+                      SizedBox(width: R.w(12)),
+                      Expanded(
+                        child: Text(
+                          proof.name ?? 'payment_proof.title'.trns(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: R.sp(13),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.darkGrey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: controller.openPaymentProof,
+                  child: Stack(
+                    children: [
+                      AppCachedImage(
+                        imageUrl: imageUrl,
+                        httpHeaders: controller.paymentProofHeaders,
+                        cacheKey: imageUrl.isEmpty
+                            ? null
+                            : '$imageUrl|${proof.uploadedAt}',
+                        width: double.infinity,
+                        height: R.w(170),
+                        fit: BoxFit.contain,
+                        borderRadius: BorderRadius.circular(R.w(10)),
+                      ),
+                      Positioned(
+                        right: R.w(8),
+                        bottom: R.h(8),
+                        child: Container(
+                          padding: EdgeInsets.all(R.w(6)),
+                          decoration: BoxDecoration(
+                            color: AppColors.black.withValues(alpha: 0.55),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.visibility_outlined,
+                            color: AppColors.white,
+                            size: R.sp(18),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: R.h(10)),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          proof.name ?? 'payment_proof.title'.trns(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: R.sp(13),
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.darkGrey,
+                          ),
+                        ),
+                        if (proof.sizeLabel.isNotEmpty)
+                          Text(
+                            proof.sizeLabel,
+                            style: TextStyle(
+                              fontSize: R.sp(12),
+                              color: AppColors.mediumGrey,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: uploading ? null : controller.openPaymentProof,
+                    icon: Icon(
+                      Icons.visibility_outlined,
+                      size: R.sp(18),
+                      color: AppColors.primary,
+                    ),
+                    label: Text(
+                      'payment_proof.view'.trns(),
+                      style: TextStyle(
+                        fontSize: R.sp(12),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: R.h(8)),
+              SizedBox(
+                height: R.h(44),
+                child: MainBtn(
+                  text: 'payment_proof.replace_proof'.trns(),
+                  color: AppColors.darkGrey,
+                  borderRadius: 10,
+                  isLoading: uploading,
+                  onPressed: uploading ? null : controller.pickPaymentProof,
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
+  }
+}
+
 class _DetailsShimmer extends StatelessWidget {
   const _DetailsShimmer();
 
@@ -407,14 +631,19 @@ class _DetailsShimmer extends StatelessWidget {
       padding: EdgeInsets.all(R.w(20)),
       child: Column(
         children: [
-          ShimmerBox(
-              width: double.infinity, height: R.h(96), borderRadius: 16),
+          ShimmerBox(width: double.infinity, height: R.h(96), borderRadius: 16),
           SizedBox(height: R.h(16)),
           ShimmerBox(
-              width: double.infinity, height: R.h(180), borderRadius: 16),
+            width: double.infinity,
+            height: R.h(180),
+            borderRadius: 16,
+          ),
           SizedBox(height: R.h(16)),
           ShimmerBox(
-              width: double.infinity, height: R.h(110), borderRadius: 16),
+            width: double.infinity,
+            height: R.h(110),
+            borderRadius: 16,
+          ),
         ],
       ),
     );
@@ -433,16 +662,18 @@ class _ErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_off_outlined,
-              size: R.sp(48), color: AppColors.lightGrey),
+          Icon(
+            Icons.cloud_off_outlined,
+            size: R.sp(48),
+            color: AppColors.lightGrey,
+          ),
           SizedBox(height: R.h(12)),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: R.w(48)),
             child: Text(
               message,
               textAlign: TextAlign.center,
-              style:
-                  TextStyle(fontSize: R.sp(14), color: AppColors.mediumGrey),
+              style: TextStyle(fontSize: R.sp(14), color: AppColors.mediumGrey),
             ),
           ),
           SizedBox(height: R.h(16)),
@@ -455,7 +686,9 @@ class _ErrorState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(R.w(10)),
               ),
               padding: EdgeInsets.symmetric(
-                  horizontal: R.w(24), vertical: R.h(12)),
+                horizontal: R.w(24),
+                vertical: R.h(12),
+              ),
             ),
             child: Text(
               'common.retry'.trns(),

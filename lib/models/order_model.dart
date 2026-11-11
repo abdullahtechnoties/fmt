@@ -1,3 +1,5 @@
+import 'package:fmt/models/payment_proof_model.dart';
+
 /// Orders: `GET /orders` (newest first, paginated) and
 /// `GET /orders/{id}` (one order plus a fresh `whatsapp_url`).
 /// Shapes are defensive — the API doc only names the key fields.
@@ -38,8 +40,7 @@ class OrderItem {
           ?.toString(),
       imageUrl: (json['image'] ?? json['thumbnail'] ?? json['product_image'])
           ?.toString(),
-      variantLabel:
-          (json['variant_label'] ?? json['variant'])?.toString(),
+      variantLabel: (json['variant_label'] ?? json['variant'])?.toString(),
       quantity: qty,
       price: price,
       subtotal: sub == 0 ? price * qty : sub,
@@ -58,6 +59,7 @@ class OrderSummary {
     this.storeName,
     this.previewTitle,
     this.previewImage,
+    this.paymentProof,
   });
 
   final dynamic id;
@@ -69,10 +71,13 @@ class OrderSummary {
   final String? storeName;
   final String? previewTitle;
   final String? previewImage;
+  final PaymentProof? paymentProof;
 
   String get statusLabel => (status ?? 'pending').trim();
 
   bool get isPending => statusLabel.toLowerCase() == 'pending';
+
+  bool get hasPaymentProof => paymentProof != null;
 
   static double _num(dynamic v) {
     if (v is num) return v.toDouble();
@@ -105,15 +110,17 @@ class OrderSummary {
       status: json['status']?.toString(),
       paymentMethod: json['payment_method']?.toString(),
       total: _num(json['total'] ?? json['grand_total']),
-      itemsCount: _int(json['items_count'] ??
-          json['total_items'] ??
-          (items.isNotEmpty ? items.length : 0)),
-      createdAt:
-          (json['created_at'] ?? json['date'] ?? json['order_date'])
-              ?.toString(),
+      itemsCount: _int(
+        json['items_count'] ??
+            json['total_items'] ??
+            (items.isNotEmpty ? items.length : 0),
+      ),
+      createdAt: (json['created_at'] ?? json['date'] ?? json['order_date'])
+          ?.toString(),
       storeName: (store['name'] ?? json['store_name'])?.toString(),
       previewTitle: previewTitle,
       previewImage: previewImage,
+      paymentProof: PaymentProof.tryParse(json['payment_proof']),
     );
   }
 }
@@ -130,6 +137,7 @@ class OrderDetail {
     this.billingCity,
     this.notes,
     this.whatsappUrl,
+    this.paymentProof,
   });
 
   final OrderSummary summary;
@@ -142,8 +150,27 @@ class OrderDetail {
   final String? billingCity;
   final String? notes;
   final String? whatsappUrl;
+  final PaymentProof? paymentProof;
 
   bool get hasWhatsapp => (whatsappUrl ?? '').trim().isNotEmpty;
+
+  bool get hasPaymentProof => paymentProof != null;
+
+  OrderDetail copyWith({PaymentProof? paymentProof}) {
+    return OrderDetail(
+      summary: summary,
+      items: items,
+      subtotal: subtotal,
+      storeName: storeName,
+      billingName: billingName,
+      billingPhone: billingPhone,
+      billingAddress: billingAddress,
+      billingCity: billingCity,
+      notes: notes,
+      whatsappUrl: whatsappUrl,
+      paymentProof: paymentProof ?? this.paymentProof,
+    );
+  }
 
   static OrderDetail fromBody(Map<String, dynamic>? body) {
     final data = body?['data'];
@@ -158,9 +185,9 @@ class OrderDetail {
     final rawItems = orderJson['items'];
     final items = rawItems is List
         ? rawItems
-            .whereType<Map>()
-            .map((e) => OrderItem.fromJson(Map<String, dynamic>.from(e)))
-            .toList()
+              .whereType<Map>()
+              .map((e) => OrderItem.fromJson(Map<String, dynamic>.from(e)))
+              .toList()
         : <OrderItem>[];
     double sub = 0;
     if (orderJson['subtotal'] != null) {
@@ -176,8 +203,7 @@ class OrderDetail {
         : orderJson;
     String? addr = (billing['billing_address'] ?? billing['address'])
         ?.toString();
-    final city =
-        (billing['billing_city'] ?? billing['city'])?.toString();
+    final city = (billing['billing_city'] ?? billing['city'])?.toString();
     if (addr != null && city != null && city.isNotEmpty) {
       addr = '$addr, $city';
     }
@@ -187,13 +213,16 @@ class OrderDetail {
       subtotal: sub,
       storeName: summary.storeName,
       billingName: (billing['billing_name'] ?? billing['name'])?.toString(),
-      billingPhone:
-          (billing['billing_phone'] ?? billing['phone'])?.toString(),
+      billingPhone: (billing['billing_phone'] ?? billing['phone'])?.toString(),
       billingAddress: addr,
       billingCity: city,
       notes: (orderJson['order_notes'] ?? orderJson['notes'])?.toString(),
-      whatsappUrl: map['whatsapp_url']?.toString() ??
+      whatsappUrl:
+          map['whatsapp_url']?.toString() ??
           orderJson['whatsapp_url']?.toString(),
+      paymentProof: PaymentProof.tryParse(
+        orderJson['payment_proof'] ?? map['payment_proof'],
+      ),
     );
   }
 }

@@ -43,6 +43,7 @@ class ApiPath {
   static const String orders = '/orders';
   static String orderDetail(Object id) => '/orders/$id';
   static String orderInvoice(Object id) => '/orders/$id/invoice';
+  static String orderPaymentProof(Object id) => '/orders/$id/payment-proof';
 
   // Account
   static const String accountProfile = '/account/profile';

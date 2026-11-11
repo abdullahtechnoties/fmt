@@ -14,7 +14,7 @@ class OrderSuccessController extends GetxController {
   final orderId = Rxn<dynamic>();
   final status = 'pending'.obs;
   final total = 0.0.obs;
-  final paymentMethod = 'COD'.obs;
+  final paymentMethod = 'Online Payment'.obs;
   final whatsappUrl = RxnString();
 
   @override
@@ -38,10 +38,10 @@ class OrderSuccessController extends GetxController {
     }
   }
 
-  bool get hasWhatsapp =>
-      (whatsappUrl.value ?? '').trim().isNotEmpty;
+  bool get hasWhatsapp => (whatsappUrl.value ?? '').trim().isNotEmpty;
 
-  Future<void> openWhatsapp() async {    final url = (whatsappUrl.value ?? '').trim();
+  Future<void> openWhatsapp() async {
+    final url = (whatsappUrl.value ?? '').trim();
     if (url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
