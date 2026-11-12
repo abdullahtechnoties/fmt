@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fmt/app/routes/app_pages.dart';
 import 'package:fmt/app/modules/productDetails/controllers/product_details_controller.dart';
 import 'package:fmt/models/catalog_model.dart';
 import 'package:fmt/utilities/colors.dart';
@@ -23,6 +24,25 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     R.init(context);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Obx(
+        () => AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: controller.showCartFab.value
+              ? Padding(
+                padding: const EdgeInsets.only(bottom: 70.0),
+                child: FloatingActionButton.extended(
+                    key: const ValueKey('view-cart'),
+                    onPressed: () => Get.toNamed(Routes.CART),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    icon: const Icon(Icons.shopping_cart_outlined),
+                    label: Text('cart.title'.trns()),
+                  ),
+              )
+              : const SizedBox.shrink(key: ValueKey('hidden-cart')),
+        ),
+      ),
       body: SafeArea(
         bottom: false,
         child: Obx(() {

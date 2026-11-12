@@ -43,6 +43,7 @@ class ProductDetailsController extends GetxController {
   final RxMap<int, int> selectedOptions = <int, int>{}.obs;
   final RxInt quantity = 1.obs;
   final RxBool isAdding = false.obs;
+  final RxBool showCartFab = false.obs;
 
   int? _boundStoreId;
   String? _slug;
@@ -256,6 +257,7 @@ class ProductDetailsController extends GetxController {
         title: 'cart.added_title'.trns(),
         message: 'cart.added'.trnsFormat({'title': item.title}),
       );
+      showCartFab.value = true;
     } finally {
       isAdding.value = wasAdding;
     }
@@ -303,6 +305,7 @@ class ProductDetailsController extends GetxController {
         title: 'cart.added_title'.trns(),
         message: 'cart.added'.trnsFormat({'title': p.title}),
       );
+      showCartFab.value = true;
     } finally {
       isAdding.value = false;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fmt/utilities/colors.dart';
 import 'package:get/get.dart';
 
 
@@ -20,10 +21,10 @@ class SnackbarService {
         padding: const EdgeInsets.only(left: 12),
         child: Icon(Icons.check_circle, color: Colors.white),
       ), 
-      backgroundColor: Color(0xFF8FC642),
-      backgroundGradient: LinearGradient(
-        colors: [Color(0xFF8FC642), const Color.fromARGB(255, 119, 161, 61)],
-      ),
+      backgroundColor: AppColors.primary,
+      // backgroundGradient: LinearGradient(
+      //   colors: [Color(0xFF8FC642), const Color.fromARGB(255, 119, 161, 61)],
+      // ),
       colorText: Colors.white,
       borderRadius: 8,
       barBlur: 8.0,

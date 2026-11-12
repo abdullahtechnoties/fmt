@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fmt/app/modules/bottomnav/controllers/bottomnav_controller.dart';
 import 'package:fmt/app/modules/home/controllers/home_controller.dart';
 import 'package:fmt/app/modules/products/controllers/products_controller.dart';
+import 'package:fmt/models/catalog_model.dart';
 import 'package:fmt/models/store_model.dart';
 import 'package:fmt/repositories/cart_repository.dart';
 import 'package:fmt/services/store_service.dart';
 import 'package:fmt/utilities/colors.dart';
+import 'package:fmt/utilities/ping_pong_auto_scroller.dart';
 import 'package:fmt/utilities/responsive/responsive_util.dart';
 import 'package:fmt/utilities/translation_extention.dart';
 import 'package:fmt/widgets/branch_selector.dart';
@@ -107,21 +109,9 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                       SizedBox(height: R.h(16)),
-                      SizedBox(
-                        height: R.h(160),
-                        child: ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: R.w(20)),
-                          itemCount: controller.categories.length,
-                          itemBuilder: (context, index) {
-                            final category = controller.categories[index];
-                            return CategoryCard(
-                              category: category,
-                              onBrowse: () => controller.openCategory(category),
-                            );
-                          },
-                        ),
+                      _AutoScrollingCategories(
+                        categories: controller.categories,
+                        onBrowse: controller.openCategory,
                       ),
                       SizedBox(height: R.h(28)),
                     ],
@@ -245,6 +235,64 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AutoScrollingCategories extends StatefulWidget {
+  const _AutoScrollingCategories({
+    required this.categories,
+    required this.onBrowse,
+  });
+
+  final List<CatalogCategory> categories;
+  final ValueChanged<CatalogCategory> onBrowse;
+
+  @override
+  State<_AutoScrollingCategories> createState() =>
+      _AutoScrollingCategoriesState();
+}
+
+class _AutoScrollingCategoriesState extends State<_AutoScrollingCategories>
+    with SingleTickerProviderStateMixin {
+  late final PingPongAutoScroller _scroller;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroller = PingPongAutoScroller(
+      vsync: this,
+      pixelsPerSecond: 28,
+    )..start();
+  }
+
+  @override
+  void dispose() {
+    _scroller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: R.h(160),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _scroller.handleNotification,
+        child: ListView.builder(
+          controller: _scroller.scrollController,
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: R.w(20)),
+          itemCount: widget.categories.length,
+          itemBuilder: (context, index) {
+            final category = widget.categories[index];
+            return CategoryCard(
+              category: category,
+              onBrowse: () => widget.onBrowse(category),
+            );
+          },
         ),
       ),
     );
